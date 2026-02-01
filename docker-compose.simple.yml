@@ -12,14 +12,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/init-db:/docker-entrypoint-initdb.d
     networks:
       - ecommerce_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -30,11 +24,6 @@ services:
       - redis_data:/data
     networks:
       - ecommerce_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   backend:
     build:
@@ -49,15 +38,11 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: password
       DB_NAME: ecommerce_db
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
       JWT_EXPIRES_IN: 7d
       MAX_FILE_SIZE: 5242880
       UPLOAD_PATH: uploads
       FRONTEND_URL: http://localhost:3000
-      ORANGE_MONEY_API_KEY: ${ORANGE_MONEY_API_KEY:-}
-      WAVE_API_KEY: ${WAVE_API_KEY:-}
-      MOOV_API_KEY: ${MOOV_API_KEY:-}
-      CARD_PAYMENT_API_KEY: ${CARD_PAYMENT_API_KEY:-}
     ports:
       - "3001:3001"
     volumes:
@@ -65,17 +50,8 @@ services:
     networks:
       - ecommerce_network
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
+      - postgres
+      - redis
 
   frontend:
     build:
@@ -92,30 +68,6 @@ services:
       - ecommerce_network
     depends_on:
       - backend
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine
-    container_name: ecommerce_nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - backend_uploads:/var/www/uploads:ro
-    networks:
-      - ecommerce_network
-    depends_on:
-      - frontend
-      - backend
-    restart: unless-stopped
 
 volumes:
   postgres_data:
