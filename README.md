@@ -31,65 +31,123 @@ A modern e-commerce platform designed specifically for West African markets (Mal
 - **Database:** PostgreSQL
 - **Caching:** Redis
 - **Containerization:** Docker & Docker Compose
+- **Reverse Proxy:** Nginx
 
-## Getting Started
+## Quick Start (Docker)
 
 ### Prerequisites
+- Docker Desktop or Docker Engine
+- Docker Compose v2.0+
+- 4GB+ RAM available
 
+### 1. Clone and Deploy
+```bash
+git clone <repository-url>
+cd west-africa-ecommerce
+
+# Automated deployment
+./deploy.sh          # Linux/Mac
+# or
+.\deploy.ps1         # Windows PowerShell
+
+# Manual deployment
+make deploy          # Using Makefile
+```
+
+### 2. Access the Platform
+- **Frontend:** http://localhost:3000
+- **Admin Dashboard:** http://localhost:3000/admin
+- **Backend API:** http://localhost:3001/api
+- **API Docs:** http://localhost:3001/api/docs
+
+## Development Setup
+
+### Prerequisites
 - Node.js 18+ 
 - Docker and Docker Compose
 - Git
 
-### Installation
+### 1. Clone and Setup
+```bash
+git clone <repository-url>
+cd west-africa-ecommerce
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd ecommerce-platform
-   ```
-
-2. **Start the database services**
-   ```bash
-   docker-compose up -d postgres redis
-   ```
-
-3. **Setup Backend**
-   ```bash
-   cd backend
-   npm install
-   cp .env.example .env
-   # Edit .env with your configuration
-   npm run migration:run
-   npm run start:dev
-   ```
-
-4. **Setup Frontend**
-   ```bash
-   cd frontend
-   npm install
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
-   npm run dev
-   ```
-
-### Environment Variables
-
-#### Backend (.env)
-```env
-NODE_ENV=development
-PORT=3001
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=password
-DB_NAME=ecommerce_db
-JWT_SECRET=your-jwt-secret
+# Start database services
+docker-compose up -d postgres redis
 ```
 
-#### Frontend (.env.local)
+### 2. Backend Setup
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Edit .env with your configuration
+npm run migration:run
+npm run seed
+npm run start:dev
+```
+
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+# Edit .env.local with your configuration
+npm run dev
+```
+
+## Deployment
+
+### Quick Deployment Commands
+
+```bash
+# Development deployment
+make deploy
+
+# Production deployment  
+make deploy-prod
+
+# View service status
+make status
+
+# View logs
+make logs
+
+# Stop services
+make stop
+```
+
+### Manual Docker Commands
+
+```bash
+# Build and start all services
+docker-compose build
+docker-compose up -d
+
+# Production deployment
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Initialize database
+docker-compose exec backend npm run migration:run
+docker-compose exec backend npm run seed
+```
+
+### Environment Configuration
+
+Create `.env` file in root directory:
+
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+# JWT Configuration
+JWT_SECRET=your-super-secure-jwt-secret-key
+
+# Payment Provider API Keys
+ORANGE_MONEY_API_KEY=your-orange-money-api-key
+WAVE_API_KEY=your-wave-api-key
+MOOV_API_KEY=your-moov-api-key
+CARD_PAYMENT_API_KEY=your-card-payment-api-key
+
+# Database (optional - uses Docker defaults)
+DB_PASSWORD=your-secure-db-password
 ```
 
 ## Project Structure
@@ -101,6 +159,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 │   │   ├── modules/        # Feature modules
 │   │   ├── config/         # Configuration files
 │   │   └── migrations/     # Database migrations
+│   ├── Dockerfile          # Backend container config
 │   └── package.json
 ├── frontend/               # Next.js application
 │   ├── src/
@@ -108,65 +167,102 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 │   │   ├── components/    # React components
 │   │   ├── store/         # Redux store
 │   │   └── types/         # TypeScript types
+│   ├── Dockerfile          # Frontend container config
 │   └── package.json
-├── docker-compose.yml      # Docker services
+├── nginx/                  # Nginx configuration
+│   └── nginx.conf         # Reverse proxy config
+├── docker-compose.yml      # Main Docker services
+├── docker-compose.prod.yml # Production overrides
+├── deploy.sh              # Linux/Mac deployment script
+├── deploy.ps1             # Windows deployment script
+├── Makefile               # Development commands
+├── DEPLOYMENT.md          # Detailed deployment guide
 └── README.md
 ```
 
-## API Documentation
+## Service Architecture
 
-Once the backend is running, visit:
-- Swagger UI: http://localhost:3001/api/docs
-- Health Check: http://localhost:3001/api/health
+```
+Internet → Nginx (80/443) → Frontend (3000) / Backend (3001)
+                          ↓
+                     PostgreSQL (5432) + Redis (6379)
+```
 
 ## Development
 
 ### Running Tests
 ```bash
 # Backend tests
-cd backend
-npm run test
+cd backend && npm test
 
 # Frontend tests  
-cd frontend
-npm run test
+cd frontend && npm test
+
+# Using Makefile
+make test
 ```
 
-### Database Migrations
+### Database Operations
 ```bash
-cd backend
-npm run migration:generate -- src/migrations/MigrationName
-npm run migration:run
+# Run migrations
+make db-migrate
+
+# Seed database
+make db-seed
+
+# Database shell
+make db-shell
+
+# Reset database
+make db-reset
 ```
 
-### Code Quality
+### Monitoring and Maintenance
+
 ```bash
-# Linting
-npm run lint
+# View service status
+make status
 
-# Type checking
-npm run type-check
+# View logs
+make logs
+
+# Create backup
+make backup
+
+# Clean up containers
+make clean
 ```
 
-## Deployment
+## Production Deployment
 
-### Production Build
-```bash
-# Backend
-cd backend
-npm run build
-npm run start:prod
+### Security Checklist
+- [ ] Change default database passwords
+- [ ] Set strong JWT secrets
+- [ ] Configure SSL certificates
+- [ ] Set up proper firewall rules
+- [ ] Configure payment provider API keys
+- [ ] Enable HTTPS in Nginx
+- [ ] Set up monitoring and logging
 
-# Frontend
-cd frontend
-npm run build
-npm start
-```
+### Performance Optimization
+- [ ] Configure resource limits
+- [ ] Set up horizontal scaling
+- [ ] Enable database connection pooling
+- [ ] Configure CDN for static assets
+- [ ] Set up load balancing
 
-### Docker Production
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
+### Monitoring
+- [ ] Health check endpoints
+- [ ] Application logs
+- [ ] Database performance
+- [ ] Resource usage monitoring
+- [ ] Error tracking
+
+## API Documentation
+
+Once the backend is running, visit:
+- **Swagger UI:** http://localhost:3001/api/docs
+- **Health Check:** http://localhost:3001/api/health
 
 ## Contributing
 
@@ -175,6 +271,39 @@ docker-compose -f docker-compose.prod.yml up -d
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+## Troubleshooting
+
+### Common Issues
+
+**Port conflicts:**
+```bash
+# Check what's using the port
+netstat -tulpn | grep :3000
+
+# Stop conflicting services
+sudo systemctl stop service-name
+```
+
+**Database connection issues:**
+```bash
+# Check database logs
+docker-compose logs postgres
+
+# Test connection
+docker-compose exec postgres psql -U postgres -d ecommerce_db -c "SELECT 1;"
+```
+
+**Service won't start:**
+```bash
+# Check service logs
+docker-compose logs service-name
+
+# Restart specific service
+docker-compose restart service-name
+```
+
+For detailed troubleshooting, see [DEPLOYMENT.md](./DEPLOYMENT.md).
 
 ## License
 

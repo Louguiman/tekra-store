@@ -1,0 +1,35 @@
+# Development overrides for docker-compose.yml
+# This file is automatically loaded by docker-compose for development
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: base  # Use base stage for development
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    command: npm run start:dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: base  # Use base stage for development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+
+  # Remove nginx for development (direct access to services)
+  nginx:
+    profiles:
+      - production
