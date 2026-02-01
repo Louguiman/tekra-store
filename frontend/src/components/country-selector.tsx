@@ -49,23 +49,29 @@ export function CountrySelector() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isLoading}
-        className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-white/20 border border-white/30 rounded-lg hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center px-6 py-3 text-sm font-tech font-semibold bg-dark-200/50 border border-dark-300/50 rounded-xl hover:bg-dark-200/70 hover:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-dark-800 min-w-[200px]"
       >
         {isLoading ? (
           <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-            Chargement...
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500 mr-3"></div>
+            <span className="text-primary-500">LOADING REGIONS...</span>
           </>
         ) : selectedCountry ? (
           <>
-            <span className="mr-2">{selectedCountry.flag}</span>
-            {selectedCountry.name}
+            <span className="mr-3 text-xl">{selectedCountry.flag}</span>
+            <div className="flex flex-col items-start">
+              <span className="font-gaming text-xs text-primary-500 tracking-wider">GAMING REGION</span>
+              <span className="font-tech font-semibold">{selectedCountry.name}</span>
+            </div>
           </>
         ) : (
-          'Sélectionnez votre pays'
+          <div className="flex flex-col items-center">
+            <span className="font-gaming text-xs text-primary-500 tracking-wider mb-1">SELECT</span>
+            <span className="font-tech font-semibold">GAMING REGION</span>
+          </div>
         )}
         <svg
-          className={`ml-2 h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`ml-3 h-5 w-5 transition-transform duration-300 text-primary-500 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -75,17 +81,27 @@ export function CountrySelector() {
       </button>
 
       {isOpen && !isLoading && (
-        <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
-          {availableCountries.map((country) => (
+        <div className="absolute z-50 w-full mt-2 bg-dark-100/95 backdrop-blur-md border border-dark-300/50 rounded-xl shadow-2xl overflow-hidden animate-slide-up">
+          {availableCountries.map((country, index) => (
             <button
               key={country.code}
               onClick={() => handleCountrySelect(country)}
-              className="flex items-center w-full px-4 py-3 text-left text-gray-900 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+              className="flex items-center w-full px-6 py-4 text-left hover:bg-dark-200/50 transition-all duration-300 group border-b border-dark-300/20 last:border-b-0"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <span className="mr-3">{country.flag}</span>
-              <div>
-                <div className="font-medium">{country.name}</div>
-                <div className="text-sm text-gray-500">Devise: {country.currency}</div>
+              <span className="mr-4 text-2xl group-hover:scale-110 transition-transform duration-300">{country.flag}</span>
+              <div className="flex-1">
+                <div className="font-tech font-semibold text-dark-800 group-hover:text-primary-500 transition-colors duration-300">
+                  {country.name}
+                </div>
+                <div className="text-sm text-dark-600 font-tech">
+                  <span className="text-secondary-500">Currency:</span> {country.currency}
+                </div>
+              </div>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
             </button>
           ))}

@@ -29,6 +29,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: production
     container_name: ecommerce_backend
     environment:
       NODE_ENV: production
@@ -57,6 +58,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: production
     container_name: ecommerce_frontend
     environment:
       NODE_ENV: production
