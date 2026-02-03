@@ -21,6 +21,11 @@ export enum AuditAction {
   PRODUCT_MANAGEMENT = 'product_management',
   USER_MANAGEMENT = 'user_management',
   SYSTEM_CONFIG = 'system_config',
+  SUPPLIER_REGISTRATION = 'supplier_registration',
+  SUPPLIER_SUBMISSION = 'supplier_submission',
+  AI_PROCESSING = 'ai_processing',
+  HUMAN_VALIDATION = 'human_validation',
+  INVENTORY_INTEGRATION = 'inventory_integration',
 }
 
 export enum AuditResource {
@@ -34,6 +39,8 @@ export enum AuditResource {
   DELIVERY = 'delivery',
   SYSTEM = 'system',
   AUTH = 'auth',
+  SUPPLIER = 'supplier',
+  SUPPLIER_SUBMISSION = 'supplier_submission',
 }
 
 export enum AuditSeverity {

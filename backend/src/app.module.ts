@@ -17,6 +17,8 @@ import { DeliveryModule } from './delivery/delivery.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AuditModule } from './audit/audit.module';
 import { DataImportExportModule } from './data-import-export/data-import-export.module';
+import { SuppliersModule } from './suppliers/suppliers.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -40,6 +42,8 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     NotificationsModule,
     AuditModule,
     DataImportExportModule,
+    SuppliersModule,
+    WhatsappModule,
   ],
   controllers: [AppController],
   providers: [
