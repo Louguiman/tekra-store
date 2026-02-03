@@ -118,53 +118,61 @@ export class AddSupplierAutomation1704312008000 implements MigrationInterface {
       CHECK ("processing_status" IN ('started', 'completed', 'failed'))
     `);
 
-    // Update audit_logs constraints to include new actions and resources
-    await queryRunner.query(`
-      ALTER TABLE "audit_logs" 
-      DROP CONSTRAINT "CHK_audit_logs_action"
-    `);
+    // Update audit_logs constraints to include new actions and resources (only if table exists)
+    const auditLogsExists = await queryRunner.hasTable('audit_logs');
+    
+    if (auditLogsExists) {
+      await queryRunner.query(`
+        ALTER TABLE "audit_logs" 
+        DROP CONSTRAINT "CHK_audit_logs_action"
+      `);
 
-    await queryRunner.query(`
-      ALTER TABLE "audit_logs" 
-      ADD CONSTRAINT "CHK_audit_logs_action" 
-      CHECK ("action" IN ('create', 'update', 'delete', 'login', 'logout', 'access_denied', 'role_change', 'stock_adjustment', 'order_status_change', 'product_management', 'user_management', 'system_config', 'supplier_registration', 'supplier_submission', 'ai_processing', 'human_validation', 'inventory_integration'))
-    `);
+      await queryRunner.query(`
+        ALTER TABLE "audit_logs" 
+        ADD CONSTRAINT "CHK_audit_logs_action" 
+        CHECK ("action" IN ('create', 'update', 'delete', 'login', 'logout', 'access_denied', 'role_change', 'stock_adjustment', 'order_status_change', 'product_management', 'user_management', 'system_config', 'supplier_registration', 'supplier_submission', 'ai_processing', 'human_validation', 'inventory_integration'))
+      `);
 
-    await queryRunner.query(`
-      ALTER TABLE "audit_logs" 
-      DROP CONSTRAINT "CHK_audit_logs_resource"
-    `);
+      await queryRunner.query(`
+        ALTER TABLE "audit_logs" 
+        DROP CONSTRAINT "CHK_audit_logs_resource"
+      `);
 
-    await queryRunner.query(`
-      ALTER TABLE "audit_logs" 
-      ADD CONSTRAINT "CHK_audit_logs_resource" 
-      CHECK ("resource" IN ('user', 'product', 'order', 'inventory', 'payment', 'category', 'country', 'delivery', 'system', 'auth', 'supplier', 'supplier_submission'))
-    `);
+      await queryRunner.query(`
+        ALTER TABLE "audit_logs" 
+        ADD CONSTRAINT "CHK_audit_logs_resource" 
+        CHECK ("resource" IN ('user', 'product', 'order', 'inventory', 'payment', 'category', 'country', 'delivery', 'system', 'auth', 'supplier', 'supplier_submission'))
+      `);
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Revert audit_logs constraints
-    await queryRunner.query(`
-      ALTER TABLE "audit_logs" 
-      DROP CONSTRAINT "CHK_audit_logs_action"
-    `);
+    // Revert audit_logs constraints (only if table exists)
+    const auditLogsExists = await queryRunner.hasTable('audit_logs');
+    
+    if (auditLogsExists) {
+      await queryRunner.query(`
+        ALTER TABLE "audit_logs" 
+        DROP CONSTRAINT "CHK_audit_logs_action"
+      `);
 
-    await queryRunner.query(`
-      ALTER TABLE "audit_logs" 
-      ADD CONSTRAINT "CHK_audit_logs_action" 
-      CHECK ("action" IN ('create', 'update', 'delete', 'login', 'logout', 'access_denied', 'role_change', 'stock_adjustment', 'order_status_change', 'product_management', 'user_management', 'system_config'))
-    `);
+      await queryRunner.query(`
+        ALTER TABLE "audit_logs" 
+        ADD CONSTRAINT "CHK_audit_logs_action" 
+        CHECK ("action" IN ('create', 'update', 'delete', 'login', 'logout', 'access_denied', 'role_change', 'stock_adjustment', 'order_status_change', 'product_management', 'user_management', 'system_config'))
+      `);
 
-    await queryRunner.query(`
-      ALTER TABLE "audit_logs" 
-      DROP CONSTRAINT "CHK_audit_logs_resource"
-    `);
+      await queryRunner.query(`
+        ALTER TABLE "audit_logs" 
+        DROP CONSTRAINT "CHK_audit_logs_resource"
+      `);
 
-    await queryRunner.query(`
-      ALTER TABLE "audit_logs" 
-      ADD CONSTRAINT "CHK_audit_logs_resource" 
-      CHECK ("resource" IN ('user', 'product', 'order', 'inventory', 'payment', 'category', 'country', 'delivery', 'system', 'auth'))
-    `);
+      await queryRunner.query(`
+        ALTER TABLE "audit_logs" 
+        ADD CONSTRAINT "CHK_audit_logs_resource" 
+        CHECK ("resource" IN ('user', 'product', 'order', 'inventory', 'payment', 'category', 'country', 'delivery', 'system', 'auth'))
+      `);
+    }
 
     // Drop foreign key constraints
     await queryRunner.query(`ALTER TABLE "processing_logs" DROP CONSTRAINT "FK_processing_logs_submission_id"`);

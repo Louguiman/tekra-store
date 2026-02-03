@@ -5,6 +5,8 @@ import { SupplierSubmission } from '../entities/supplier-submission.entity';
 import { ProcessingLog } from '../entities/processing-log.entity';
 import { SuppliersService } from '../suppliers/suppliers.service';
 import { AuditService } from '../audit/audit.service';
+import { MediaStorageService, MediaFile } from './media-storage.service';
+import { MessageGroupingService } from './message-grouping.service';
 import { AuditAction, AuditResource } from '../entities/audit-log.entity';
 import * as crypto from 'crypto';
 
@@ -63,6 +65,8 @@ export class WhatsappService {
     private processingLogRepository: Repository<ProcessingLog>,
     private suppliersService: SuppliersService,
     private auditService: AuditService,
+    private mediaStorageService: MediaStorageService,
+    private messageGroupingService: MessageGroupingService,
   ) {}
 
   validateWebhookSignature(signature: string, payload: string): boolean {
@@ -71,17 +75,28 @@ export class WhatsappService {
       throw new Error('WHATSAPP_WEBHOOK_SECRET not configured');
     }
 
-    const expectedSignature = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(payload)
-      .digest('hex');
+    // Ensure signature is provided
+    if (!signature) {
+      return false;
+    }
 
-    const providedSignature = signature.replace('sha256=', '');
-    
-    return crypto.timingSafeEqual(
-      Buffer.from(expectedSignature, 'hex'),
-      Buffer.from(providedSignature, 'hex')
-    );
+    try {
+      const expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(payload, 'utf8')
+        .digest('hex');
+
+      const providedSignature = signature.replace('sha256=', '');
+      
+      // Use timing-safe comparison to prevent timing attacks
+      return crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, 'hex'),
+        Buffer.from(providedSignature, 'hex')
+      );
+    } catch (error) {
+      console.error('Signature validation error:', error.message);
+      return false;
+    }
   }
 
   async processIncomingMessage(payload: WhatsAppWebhookPayload): Promise<ProcessingResult> {
@@ -99,8 +114,8 @@ export class WhatsappService {
         };
       }
 
-      // Authenticate supplier
-      const supplier = await this.suppliersService.findByPhoneNumber(message.from);
+      // Enhanced supplier authentication (Requirements 5.1, 5.3)
+      const supplier = await this.authenticateSupplier(message.from);
       if (!supplier) {
         await this.auditService.logAction({
           action: AuditAction.ACCESS_DENIED,
@@ -113,15 +128,26 @@ export class WhatsappService {
           processed: false,
           processingTime: Date.now() - startTime,
           supplierAuthenticated: false,
-          error: 'Supplier not registered',
+          error: 'Supplier not registered or inactive',
         };
       }
+
+      // Check for message grouping (Requirement 1.5)
+      const messageTimestamp = new Date(parseInt(message.timestamp) * 1000);
+      const existingGroup = await this.messageGroupingService.shouldGroupWithExisting(
+        supplier.id, 
+        messageTimestamp
+      );
 
       // Create submission record
       const submission = await this.createSubmission(supplier.id, message);
 
       // Log processing start
-      await this.logProcessingStage(submission.id, 'webhook', 'started', Date.now() - startTime);
+      await this.logProcessingStage(submission.id, 'webhook', 'started', Date.now() - startTime, null, {
+        groupedWith: existingGroup?.id,
+        messageType: message.type,
+        hasMedia: !!submission.mediaUrl,
+      });
 
       // Log successful webhook processing
       await this.auditService.logAction({
@@ -134,8 +160,13 @@ export class WhatsappService {
           supplierName: supplier.name,
           messageType: message.type,
           messageId: message.id,
+          groupedWith: existingGroup?.id,
+          phoneNumber: message.from,
         },
       });
+
+      // Update supplier metrics
+      await this.updateSupplierActivity(supplier.id);
 
       // Log processing completion
       await this.logProcessingStage(submission.id, 'webhook', 'completed', Date.now() - startTime);
@@ -233,17 +264,46 @@ export class WhatsappService {
   }
 
   private async extractMediaUrl(message: WhatsAppMessage): Promise<string | null> {
-    // In a real implementation, this would download the media from WhatsApp API
-    // For now, we'll just store the media ID
+    // Download and store media files (Requirements 1.2, 1.3, 1.4, 8.2, 8.3)
+    let mediaId: string | null = null;
+    
     switch (message.type) {
       case 'image':
-        return message.image?.id || null;
+        mediaId = message.image?.id || null;
+        break;
       case 'document':
-        return message.document?.id || null;
+        mediaId = message.document?.id || null;
+        break;
       case 'audio':
-        return message.audio?.id || null;
+        mediaId = message.audio?.id || null;
+        break;
       default:
         return null;
+    }
+
+    if (!mediaId) {
+      return null;
+    }
+
+    try {
+      // Download and store the media file
+      const mediaFile = await this.mediaStorageService.downloadMediaFromWhatsApp(mediaId);
+      
+      // Return the local file path for storage in the database
+      return mediaFile.localPath;
+    } catch (error) {
+      console.error(`Failed to download media ${mediaId}:`, error.message);
+      
+      // Log the media download failure
+      await this.auditService.logAction({
+        action: AuditAction.SUPPLIER_SUBMISSION,
+        resource: AuditResource.SUPPLIER_SUBMISSION,
+        description: `Media download failed for ${mediaId}: ${error.message}`,
+        metadata: { mediaId, messageId: message.id, error: error.message },
+      });
+
+      // Return the media ID as fallback (will be processed later)
+      return mediaId;
     }
   }
 
@@ -280,5 +340,95 @@ export class WhatsappService {
       relations: ['supplier'],
       order: { createdAt: 'ASC' },
     });
+  }
+
+  async getMediaFile(submissionId: string): Promise<MediaFile | null> {
+    const submission = await this.submissionRepository.findOne({
+      where: { id: submissionId },
+    });
+
+    if (!submission || !submission.mediaUrl) {
+      return null;
+    }
+
+    // If mediaUrl is a local path, create MediaFile object
+    if (submission.mediaUrl.startsWith('./uploads/') || submission.mediaUrl.startsWith('/')) {
+      return {
+        id: submission.whatsappMessageId,
+        originalName: submission.mediaUrl.split('/').pop() || '',
+        mimeType: this.getMimeTypeFromContentType(submission.contentType),
+        size: 0, // Would need to read file stats
+        localPath: submission.mediaUrl,
+        sha256: '',
+        downloadedAt: submission.createdAt,
+      };
+    }
+
+    // If mediaUrl is still a media ID, try to get stored file
+    return this.mediaStorageService.getStoredFile(submission.mediaUrl);
+  }
+
+  private getMimeTypeFromContentType(contentType: string): string {
+    switch (contentType) {
+      case 'image':
+        return 'image/jpeg';
+      case 'pdf':
+        return 'application/pdf';
+      case 'voice':
+        return 'audio/ogg';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  private async authenticateSupplier(phoneNumber: string): Promise<any> {
+    // Enhanced supplier authentication (Requirements 5.1, 5.3)
+    const supplier = await this.suppliersService.findByPhoneNumber(phoneNumber);
+    
+    if (!supplier) {
+      return null;
+    }
+
+    // Check if supplier is active
+    if (!supplier.isActive) {
+      await this.auditService.logAction({
+        action: AuditAction.ACCESS_DENIED,
+        resource: AuditResource.SUPPLIER,
+        description: `Inactive supplier attempted to send message: ${phoneNumber}`,
+        metadata: { phoneNumber, supplierId: supplier.id },
+      });
+      return null;
+    }
+
+    // Additional authentication checks could be added here
+    // e.g., rate limiting per supplier, time-based restrictions, etc.
+
+    return supplier;
+  }
+
+  private async updateSupplierActivity(supplierId: string): Promise<void> {
+    try {
+      const supplier = await this.suppliersService.findOne(supplierId);
+      
+      // Update performance metrics
+      const updatedMetrics = {
+        ...supplier.performanceMetrics,
+        totalSubmissions: (supplier.performanceMetrics?.totalSubmissions || 0) + 1,
+        lastSubmissionDate: new Date(),
+      };
+
+      await this.suppliersService.updateMetrics(supplierId, updatedMetrics);
+    } catch (error) {
+      console.error('Failed to update supplier activity:', error);
+      // Don't throw error as this is not critical for message processing
+    }
+  }
+
+  async getMessageGroups(supplierId?: string, limit?: number) {
+    return this.messageGroupingService.getMessageGroups(supplierId, limit);
+  }
+
+  async getSubmissionStats(supplierId?: string) {
+    return this.messageGroupingService.getSubmissionStats(supplierId);
   }
 }
