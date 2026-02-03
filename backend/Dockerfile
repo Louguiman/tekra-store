@@ -1,0 +1,32 @@
+# Simple Backend Dockerfile for Dokploy compatibility
+FROM node:18-alpine
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Create uploads directory
+RUN mkdir -p uploads
+
+# Expose port
+EXPOSE 3001
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Start the application
+CMD ["node", "dist/main"]
