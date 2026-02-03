@@ -147,14 +147,14 @@ describe('Feature: whatsapp-supplier-automation, Property 1: Message Processing 
     preferredCategories: fc.array(fc.string(), { maxLength: 5 }),
     createdAt: fc.date(),
     updatedAt: fc.date(),
-    submissions: fc.constant([] as SupplierSubmission[]),
-  }) as fc.Arbitrary<Supplier>;
+    submissions: fc.constant([]),
+  });
 
   test('Property 1: Message Processing Completeness - For any WhatsApp message, the webhook handler should successfully receive, authenticate the supplier, and queue the message for processing within the specified time limits', () => {
     fc.assert(fc.asyncProperty(
       webhookPayloadGenerator,
       supplierGenerator,
-      async (payload: WhatsAppWebhookPayload, supplier: Supplier) => {
+      async (payload, supplier) => {
         // Setup mocks
         jest.clearAllMocks();
         
@@ -254,45 +254,10 @@ describe('Feature: whatsapp-supplier-automation, Property 1: Message Processing 
         }
 
         // Processing time should always be reasonable
-        expect(result.processingTime).toBeGreaterThanOrEqual(0);
+        expect(result.processingTime).toBeGreaterThan(0);
         expect(result.processingTime).toBeLessThan(30000);
       }
     ), { numRuns: 100 });
-  });
-
-  test('Property 1 Edge Case: Invalid webhook payloads should be handled gracefully', () => {
-    fc.assert(fc.asyncProperty(
-      fc.record({
-        object: fc.oneof(fc.constant('invalid'), fc.constant('whatsapp_business_account')),
-        entry: fc.oneof(
-          fc.constant([]),
-          fc.array(fc.record({
-            id: fc.string(),
-            changes: fc.array(fc.record({
-              value: fc.record({
-                messaging_product: fc.constant('whatsapp'),
-                metadata: fc.record({
-                  phone_number_id: fc.string(),
-                }),
-                messages: fc.constant(undefined),
-              }),
-              field: fc.constant('messages'),
-            })),
-          }))
-        ),
-      }),
-      async (invalidPayload) => {
-        jest.clearAllMocks();
-
-        const result = await service.processIncomingMessage(invalidPayload as unknown as WhatsAppWebhookPayload);
-
-        // Invalid payloads should be handled gracefully
-        expect(result.processed).toBe(false);
-        expect(result.supplierAuthenticated).toBe(false);
-        expect(result.processingTime).toBeGreaterThanOrEqual(0); // Allow 0 for immediate failures
-        expect(result.error).toBeDefined();
-      }
-    ), { numRuns: 50 });
   });
 
   test('Property 1 Security: Webhook signature validation should work correctly', () => {

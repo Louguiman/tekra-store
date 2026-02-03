@@ -8,7 +8,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      target: development  # Use development stage
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -20,7 +19,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: development  # Use development stage
     volumes:
       - ./frontend:/app
       - /app/node_modules

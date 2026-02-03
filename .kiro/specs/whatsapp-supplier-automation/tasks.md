@@ -36,7 +36,7 @@ This implementation plan converts the WhatsApp Supplier Inventory Automation Sys
     - Set up rate limiting and access control
     - _Requirements: 1.5, 5.1, 5.3_
   
-  - [ ]* 2.5 Write property test for message grouping
+  - [x]* 2.5 Write property test for message grouping
     - **Property 2: Message Grouping Consistency**
     - **Validates: Requirements 1.5**
 
