@@ -12,8 +12,6 @@ import { SecurityAlert } from '../entities/security-alert.entity';
 import { InventoryModule } from '../inventory/inventory.module';
 import { OrdersModule } from '../orders/orders.module';
 import { AuditModule } from '../audit/audit.module';
-import { AuditService } from '../audit/audit.service';
-import { SecurityMonitorService } from '../audit/security-monitor.service';
 
 @Module({
   imports: [
@@ -31,7 +29,7 @@ import { SecurityMonitorService } from '../audit/security-monitor.service';
     AuditModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService, AuditService, SecurityMonitorService],
+  providers: [AdminService],
   exports: [AdminService],
 })
 export class AdminModule {}

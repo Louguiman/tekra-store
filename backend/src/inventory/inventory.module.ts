@@ -5,9 +5,13 @@ import { InventoryController } from './inventory.controller';
 import { InventoryItem } from '../entities/inventory-item.entity';
 import { StockReservation } from '../entities/stock-reservation.entity';
 import { Product } from '../entities/product.entity';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([InventoryItem, StockReservation, Product])],
+  imports: [
+    TypeOrmModule.forFeature([InventoryItem, StockReservation, Product]),
+    AuditModule,
+  ],
   controllers: [InventoryController],
   providers: [InventoryService],
   exports: [InventoryService],

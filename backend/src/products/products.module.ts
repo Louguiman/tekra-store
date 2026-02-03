@@ -9,6 +9,7 @@ import { ProductSpecification } from '../entities/product-specification.entity';
 import { Category } from '../entities/category.entity';
 import { ProductSegmentEntity } from '../entities/product-segment.entity';
 import { Country } from '../entities/country.entity';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { Country } from '../entities/country.entity';
       ProductSegmentEntity,
       Country,
     ]),
+    AuditModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

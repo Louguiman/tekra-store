@@ -7,6 +7,7 @@ import { PickupPoint } from '../entities/pickup-point.entity';
 import { DeliveryTracking } from '../entities/delivery-tracking.entity';
 import { Country } from '../entities/country.entity';
 import { Order } from '../entities/order.entity';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { Order } from '../entities/order.entity';
       Country,
       Order,
     ]),
+    AuditModule,
   ],
   controllers: [DeliveryController],
   providers: [DeliveryService],

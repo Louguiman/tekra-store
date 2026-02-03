@@ -4,9 +4,13 @@ import { CountriesController } from './countries.controller';
 import { CountriesService } from './countries.service';
 import { Country } from '../entities/country.entity';
 import { ProductPrice } from '../entities/product-price.entity';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Country, ProductPrice])],
+  imports: [
+    TypeOrmModule.forFeature([Country, ProductPrice]),
+    AuditModule,
+  ],
   controllers: [CountriesController],
   providers: [CountriesService],
   exports: [CountriesService],

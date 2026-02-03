@@ -11,12 +11,14 @@ import { Country } from '../entities/country.entity';
 import { User } from '../entities/user.entity';
 import { InventoryModule } from '../inventory/inventory.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem, Product, Country, User]),
     InventoryModule,
     NotificationsModule,
+    AuditModule,
   ],
   controllers: [OrdersController, CartController],
   providers: [OrdersService, CartService],

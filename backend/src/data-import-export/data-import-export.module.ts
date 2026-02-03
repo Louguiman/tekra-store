@@ -12,6 +12,7 @@ import { Country } from '../entities/country.entity';
 import { ProductPrice } from '../entities/product-price.entity';
 import { ProductImage } from '../entities/product-image.entity';
 import { ProductSpecification } from '../entities/product-specification.entity';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ProductSpecification } from '../entities/product-specification.entity';
       ProductImage,
       ProductSpecification,
     ]),
+    AuditModule,
   ],
   controllers: [DataImportExportController],
   providers: [
