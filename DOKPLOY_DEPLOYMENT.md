@@ -1,129 +1,43 @@
-# Dokploy Deployment Guide
+# Dokploy Deployment Guide - UPDATED
 
 ## Issue Resolution for Docker Build Failures
 
-The error "failed to read dockerfile: open Dockerfile: no such file or directory" typically occurs when Dokploy has issues with the build context or multi-stage builds.
+The error "failed to read dockerfile: open Dockerfile: no such file or directory" indicates Dokploy is having issues with Docker builds. Here are multiple solutions in order of preference.
 
-## Solution Options
+## Solution 1: Use No-Build Compose (RECOMMENDED)
 
-### Option 1: Use Simple Docker Compose (Recommended)
-
-Use the simplified docker-compose file that avoids complex multi-stage builds:
+This completely avoids Docker build issues by using base Node.js images:
 
 ```bash
-# Use the simple docker-compose file
-docker-compose -f docker-compose.simple.yml up -d
+docker-compose -f docker-compose.no-build.yml up -d
 ```
 
-### Option 2: Use Simple Dockerfiles
+This approach:
+- Uses `node:18-alpine` base images directly
+- Installs dependencies at runtime
+- Avoids all Dockerfile-related issues
+- Should work with any Docker platform
 
-If Dokploy still has issues, use the simple Dockerfiles:
+## Solution 2: Use Simplified Dockerfiles
 
-1. **Backend**: Use `backend/Dockerfile.simple`
-2. **Frontend**: Use `frontend/Dockerfile.simple`
-
-Update your docker-compose.yml to reference these:
-
-```yaml
-backend:
-  build:
-    context: ./backend
-    dockerfile: Dockerfile.simple
-
-frontend:
-  build:
-    context: ./frontend
-    dockerfile: Dockerfile.simple
-```
-
-### Option 3: Manual Build and Push
-
-If Dokploy continues to have issues, build and push images manually:
+The main Dockerfiles have been updated to single-stage builds. Try:
 
 ```bash
-# Build backend image
-cd backend
-docker build -f Dockerfile.simple -t westtech-backend .
-
-# Build frontend image  
-cd ../frontend
-docker build -f Dockerfile.simple -t westtech-frontend .
-
-# Tag and push to your registry
-docker tag westtech-backend your-registry/westtech-backend:latest
-docker tag westtech-frontend your-registry/westtech-frontend:latest
-
-docker push your-registry/westtech-backend:latest
-docker push your-registry/westtech-frontend:latest
+docker-compose up -d
 ```
 
-Then update docker-compose.yml to use the pushed images:
-
-```yaml
-backend:
-  image: your-registry/westtech-backend:latest
-
-frontend:
-  image: your-registry/westtech-frontend:latest
-```
-
-## Dokploy-Specific Configuration
-
-### Environment Variables
-
-Set these environment variables in Dokploy:
-
-```env
-NODE_ENV=production
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-POSTGRES_DB=ecommerce_db
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your-secure-password
-NEXT_PUBLIC_API_URL=https://your-domain.com/api
-NEXT_PUBLIC_APP_URL=https://your-domain.com
-```
-
-### Port Configuration
-
-Ensure these ports are properly configured in Dokploy:
-- Frontend: 3000
-- Backend: 3001
-- PostgreSQL: 5432
-- Redis: 6379
-
-### Volume Mounts
-
-Configure these volumes in Dokploy:
-- `postgres_data` for database persistence
-- `redis_data` for Redis persistence  
-- `backend_uploads` for file uploads
-
-## Troubleshooting Steps
-
-1. **Check Build Context**: Ensure Dokploy is using the correct repository root as build context
-
-2. **Verify Dockerfile Paths**: Confirm that Dockerfiles exist in the correct locations:
-   - `backend/Dockerfile` or `backend/Dockerfile.simple`
-   - `frontend/Dockerfile` or `frontend/Dockerfile.simple`
-
-3. **Check Dependencies**: Ensure all package.json files are present and valid
-
-4. **Build Locally First**: Test the build process locally before deploying:
-   ```bash
-   docker-compose -f docker-compose.simple.yml build
-   docker-compose -f docker-compose.simple.yml up -d
-   ```
-
-5. **Check Logs**: Review Dokploy build logs for specific error messages
-
-6. **Use Health Checks**: Enable health checks to ensure services start properly
-
-## Alternative: Direct Docker Commands
-
-If docker-compose continues to fail, deploy services individually:
+## Solution 3: Use Minimal Volume-Based Approach
 
 ```bash
-# Start database first
+docker-compose -f docker-compose.minimal.yml up -d
+```
+
+## Solution 4: Manual Container Deployment
+
+If all docker-compose methods fail, deploy containers individually:
+
+```bash
+# 1. Start PostgreSQL
 docker run -d --name postgres \
   -e POSTGRES_DB=ecommerce_db \
   -e POSTGRES_USER=postgres \
@@ -131,14 +45,12 @@ docker run -d --name postgres \
   -p 5432:5432 \
   postgres:15-alpine
 
-# Start Redis
+# 2. Start Redis
 docker run -d --name redis \
   -p 6379:6379 \
   redis:7-alpine
 
-# Build and start backend
-cd backend
-docker build -f Dockerfile.simple -t westtech-backend .
+# 3. Start Backend
 docker run -d --name backend \
   --link postgres:postgres \
   --link redis:redis \
@@ -150,38 +62,194 @@ docker run -d --name backend \
   -e DB_NAME=ecommerce_db \
   -e JWT_SECRET=your-secret \
   -p 3001:3001 \
-  westtech-backend
+  -v $(pwd)/backend:/app \
+  -w /app \
+  node:18-alpine \
+  sh -c "apk add --no-cache curl && npm install && npm run build && node dist/main"
 
-# Build and start frontend
-cd ../frontend
-docker build -f Dockerfile.simple -t westtech-frontend .
+# 4. Start Frontend
 docker run -d --name frontend \
   --link backend:backend \
   -e NEXT_PUBLIC_API_URL=http://localhost:3001/api \
   -p 3000:3000 \
-  westtech-frontend
+  -v $(pwd)/frontend:/app \
+  -w /app \
+  node:18-alpine \
+  sh -c "apk add --no-cache curl && npm install && npm run build && npm start"
 ```
+
+## Solution 5: Pre-built Images
+
+Build images locally and push to a registry:
+
+```bash
+# Build locally
+docker build -t your-registry/westtech-backend ./backend
+docker build -t your-registry/westtech-frontend ./frontend
+
+# Push to registry
+docker push your-registry/westtech-backend
+docker push your-registry/westtech-frontend
+
+# Create docker-compose.images.yml
+cat > docker-compose.images.yml << EOF
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  backend:
+    image: your-registry/westtech-backend
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      DB_NAME: ecommerce_db
+      JWT_SECRET: your-secret
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    image: your-registry/westtech-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+EOF
+
+# Deploy with pre-built images
+docker-compose -f docker-compose.images.yml up -d
+```
+
+## Dokploy-Specific Configuration
+
+### Environment Variables for Dokploy
+
+Set these in your Dokploy environment:
+
+```env
+NODE_ENV=production
+POSTGRES_DB=ecommerce_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your-secure-password
+JWT_SECRET=your-super-secure-jwt-secret
+NEXT_PUBLIC_API_URL=https://your-domain.com/api
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+```
+
+### Dokploy Project Setup
+
+1. **Repository**: Point to your Git repository
+2. **Build Command**: Leave empty (we're avoiding builds)
+3. **Docker Compose File**: Use `docker-compose.no-build.yml`
+4. **Environment Variables**: Set the variables above
+
+## Troubleshooting Steps
+
+### Step 1: Test Locally First
+
+```bash
+# Test the no-build approach locally
+docker-compose -f docker-compose.no-build.yml up -d
+
+# Check if services start
+docker-compose -f docker-compose.no-build.yml ps
+
+# Check logs if there are issues
+docker-compose -f docker-compose.no-build.yml logs
+```
+
+### Step 2: Verify File Structure
+
+Ensure your repository has this structure:
+```
+├── backend/
+│   ├── package.json
+│   ├── src/
+│   └── ...
+├── frontend/
+│   ├── package.json
+│   ├── src/
+│   └── ...
+├── docker-compose.no-build.yml
+└── docker-compose.yml
+```
+
+### Step 3: Check Dokploy Logs
+
+In Dokploy:
+1. Go to your project
+2. Check the deployment logs
+3. Look for specific error messages
+
+### Step 4: Alternative Platforms
+
+If Dokploy continues to have issues, consider these alternatives:
+- **Railway**: Excellent for Node.js apps
+- **Render**: Good Docker support
+- **DigitalOcean App Platform**: Simple deployment
+- **Heroku**: Classic PaaS option
+- **Vercel** (frontend) + **Railway** (backend): Split deployment
 
 ## Success Verification
 
-After deployment, verify the services:
+After deployment, test these endpoints:
 
-1. **Database**: `docker exec -it postgres psql -U postgres -d ecommerce_db -c "SELECT 1;"`
-2. **Backend**: `curl http://localhost:3001/api/health`
-3. **Frontend**: `curl http://localhost:3000`
+```bash
+# Database connection
+curl http://your-domain:3001/api/health
 
-## Production Considerations
+# Frontend
+curl http://your-domain:3000
 
-1. **Security**: Change default passwords and JWT secrets
-2. **SSL**: Configure HTTPS with proper certificates
-3. **Monitoring**: Set up logging and monitoring
-4. **Backups**: Configure database backups
-5. **Scaling**: Consider horizontal scaling for high traffic
+# API functionality
+curl http://your-domain:3001/api/countries
+```
+
+## Production Checklist
+
+- [ ] Change default passwords
+- [ ] Set secure JWT secret
+- [ ] Configure domain URLs
+- [ ] Set up SSL certificates
+- [ ] Configure environment variables
+- [ ] Test all endpoints
+- [ ] Set up monitoring
+- [ ] Configure backups
 
 ## Support
 
-If issues persist:
-1. Check Dokploy documentation
-2. Review Docker and docker-compose logs
-3. Test locally before deploying
-4. Consider using a different deployment platform if Dokploy continues to have issues
+If all solutions fail:
+
+1. **Check Dokploy Documentation**: Look for known issues
+2. **Dokploy Community**: Ask in their Discord/forums
+3. **Alternative Deployment**: Consider other platforms
+4. **Local Development**: Use `docker-compose.no-build.yml` locally
+
+The `docker-compose.no-build.yml` approach should work on any Docker platform, including Dokploy, as it avoids all Dockerfile-related issues.
