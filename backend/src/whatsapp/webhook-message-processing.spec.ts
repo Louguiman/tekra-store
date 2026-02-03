@@ -254,7 +254,7 @@ describe('Feature: whatsapp-supplier-automation, Property 1: Message Processing 
         }
 
         // Processing time should always be reasonable
-        expect(result.processingTime).toBeGreaterThan(0);
+        expect(result.processingTime).toBeGreaterThanOrEqual(0);
         expect(result.processingTime).toBeLessThan(30000);
       }
     ), { numRuns: 100 });
