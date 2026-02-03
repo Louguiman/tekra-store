@@ -17,7 +17,7 @@ const variantClasses = {
   primary: 'border-primary-500',
   secondary: 'border-secondary-500',
   accent: 'border-accent-500',
-  neon: 'border-neon-blue',
+  neon: 'border-blue-400',
 }
 
 export function LoadingSpinner({ 
@@ -37,16 +37,16 @@ export function LoadingSpinner({
         
         {/* Center dot */}
         <div className={`absolute inset-0 flex items-center justify-center`}>
-          <div className={`w-1 h-1 rounded-full bg-${variant}-500 animate-pulse`}></div>
+          <div className={`w-1 h-1 rounded-full bg-primary-500 animate-pulse`}></div>
         </div>
       </div>
       
       {/* Gaming particles */}
       <div className="absolute">
-        <div className={`w-1 h-1 bg-${variant}-500 rounded-full animate-ping opacity-75`} style={{ animationDelay: '0s' }}></div>
+        <div className={`w-1 h-1 bg-primary-500 rounded-full animate-ping opacity-75`} style={{ animationDelay: '0s' }}></div>
       </div>
       <div className="absolute">
-        <div className={`w-1 h-1 bg-${variant}-400 rounded-full animate-ping opacity-50`} style={{ animationDelay: '0.5s' }}></div>
+        <div className={`w-1 h-1 bg-primary-400 rounded-full animate-ping opacity-50`} style={{ animationDelay: '0.5s' }}></div>
       </div>
     </div>
   )

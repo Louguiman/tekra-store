@@ -5,11 +5,11 @@
 
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   }
   
   body {
-    @apply bg-dark-50 text-dark-900 dark:bg-dark-50 dark:text-dark-900;
+    @apply bg-dark-50 text-dark-900;
     background-image: 
       radial-gradient(circle at 25% 25%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, rgba(179, 71, 255, 0.1) 0%, transparent 50%);
@@ -50,17 +50,21 @@
   }
   
   .btn-neon {
-    @apply relative bg-transparent border-2 border-neon-blue text-neon-blue font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-neon-blue hover:text-dark-50 hover:shadow-lg;
+    @apply relative bg-transparent border-2 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg;
+    border-color: #00d4ff;
+    color: #00d4ff;
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
   }
   
   .btn-neon:hover {
+    background-color: #00d4ff;
+    color: #18181b;
     box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
   }
   
   /* Gaming cards */
   .card {
-    @apply bg-dark-100/80 backdrop-blur-sm rounded-xl border border-dark-200/50 p-6 transition-all duration-300 hover:border-primary-500/50 hover:shadow-xl;
+    @apply bg-dark-100 bg-opacity-80 backdrop-blur-sm rounded-xl border border-dark-200 border-opacity-50 p-6 transition-all duration-300 hover:border-primary-500 hover:border-opacity-50 hover:shadow-xl;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
   
@@ -69,31 +73,37 @@
   }
   
   .card-gaming {
-    @apply relative bg-gradient-to-br from-dark-100/90 to-dark-200/90 backdrop-blur-md rounded-xl border border-primary-500/30 p-6 transition-all duration-300 hover:border-primary-400 hover:shadow-2xl overflow-hidden;
+    @apply relative bg-gradient-to-br from-dark-100 to-dark-200 backdrop-blur-md rounded-xl border border-primary-500 border-opacity-30 p-6 transition-all duration-300 hover:border-primary-400 hover:shadow-2xl overflow-hidden;
+    background-color: rgba(39, 39, 42, 0.9);
   }
   
   .card-gaming::before {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-br from-primary-500/5 to-secondary-500/5 rounded-xl;
+    @apply absolute inset-0 bg-gradient-to-br rounded-xl;
+    background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.05), rgba(217, 70, 239, 0.05));
   }
   
   .card-gaming:hover::before {
-    @apply from-primary-500/10 to-secondary-500/10;
+    background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.1), rgba(217, 70, 239, 0.1));
   }
   
   /* Input fields */
   .input-field {
-    @apply w-full px-4 py-3 bg-dark-100/50 border border-dark-300/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-dark-800 placeholder-dark-500 transition-all duration-300;
+    @apply w-full px-4 py-3 bg-dark-100 bg-opacity-50 border border-dark-300 border-opacity-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-dark-800 transition-all duration-300;
   }
   
   .input-field:focus {
-    @apply bg-dark-100/80;
+    @apply bg-dark-100 bg-opacity-80;
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+  }
+  
+  .input-field::placeholder {
+    @apply text-dark-500;
   }
 
   /* Gaming text effects */
   .text-neon {
-    @apply text-neon-blue;
+    color: #00d4ff;
     text-shadow: 0 0 10px currentColor;
   }
   
@@ -134,7 +144,12 @@
 
   /* Gaming hover effects */
   .hover-lift {
-    @apply transition-transform duration-300 hover:scale-105 hover:-translate-y-2;
+    @apply transition-transform duration-300 hover:scale-105;
+    transform-origin: center;
+  }
+  
+  .hover-lift:hover {
+    transform: scale(1.05) translateY(-8px);
   }
   
   .hover-glow {
@@ -147,21 +162,23 @@
 
   /* Product card gaming style */
   .product-card {
-    @apply relative bg-gradient-to-br from-dark-100/90 to-dark-200/90 backdrop-blur-md rounded-xl border border-dark-300/50 overflow-hidden transition-all duration-500 hover:border-primary-500/70 hover:shadow-2xl group;
+    @apply relative bg-gradient-to-br from-dark-100 to-dark-200 backdrop-blur-md rounded-xl border border-dark-300 border-opacity-50 overflow-hidden transition-all duration-500 hover:border-primary-500 hover:border-opacity-70 hover:shadow-2xl;
+    background-color: rgba(39, 39, 42, 0.9);
   }
   
   .product-card::before {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-br from-primary-500/0 to-secondary-500/0 transition-all duration-500;
+    @apply absolute inset-0 transition-all duration-500;
+    background: linear-gradient(to bottom right, rgba(99, 102, 241, 0), rgba(217, 70, 239, 0));
   }
   
   .product-card:hover::before {
-    @apply from-primary-500/10 to-secondary-500/10;
+    background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.1), rgba(217, 70, 239, 0.1));
   }
 
   /* Navigation styles */
   .nav-link {
-    @apply relative text-dark-700 hover:text-primary-500 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-dark-200/50;
+    @apply relative text-dark-700 hover:text-primary-500 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-dark-200 hover:bg-opacity-50;
   }
   
   .nav-link::after {
@@ -180,6 +197,10 @@
   
   .section-gaming::before {
     content: '';
-    @apply absolute inset-0 cyber-grid opacity-30;
+    @apply absolute inset-0 opacity-30;
+    background-image: 
+      linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
   }
 }

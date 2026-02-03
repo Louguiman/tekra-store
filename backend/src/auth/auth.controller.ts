@@ -6,7 +6,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -26,14 +28,18 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto): Promise<AuthResultDto> {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Req() req: Request): Promise<AuthResultDto> {
+    const ipAddress = this.getClientIp(req);
+    const userAgent = req.headers['user-agent'];
+    return this.authService.login(loginDto, ipAddress, userAgent);
   }
 
   @Public()
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<AuthResultDto> {
-    return this.authService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto, @Req() req: Request): Promise<AuthResultDto> {
+    const ipAddress = this.getClientIp(req);
+    const userAgent = req.headers['user-agent'];
+    return this.authService.register(registerDto, ipAddress, userAgent);
   }
 
   @Public()
@@ -58,5 +64,16 @@ export class AuthController {
       message: 'Admin access granted',
       user: user.fullName,
     };
+  }
+
+  private getClientIp(req: Request): string {
+    return (
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+      req.headers['x-real-ip'] ||
+      req.connection?.remoteAddress ||
+      req.socket?.remoteAddress ||
+      (req as any).ip ||
+      'unknown'
+    );
   }
 }

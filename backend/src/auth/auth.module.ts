@@ -7,12 +7,16 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { AdminAuthController } from './admin-auth.controller';
 import { User } from '../entities/user.entity';
+import { AuditLog } from '../entities/audit-log.entity';
+import { SecurityAlert } from '../entities/security-alert.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { AuditService } from '../audit/audit.service';
+import { SecurityMonitorService } from '../audit/security-monitor.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, AuditLog, SecurityAlert]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -26,7 +30,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     }),
   ],
   controllers: [AuthController, AdminAuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy],
+  providers: [AuthService, JwtStrategy, LocalStrategy, AuditService, SecurityMonitorService],
   exports: [AuthService],
 })
 export class AuthModule {}

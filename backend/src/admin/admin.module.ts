@@ -7,8 +7,13 @@ import { Order } from '../entities/order.entity';
 import { Product } from '../entities/product.entity';
 import { InventoryItem } from '../entities/inventory-item.entity';
 import { Country } from '../entities/country.entity';
+import { AuditLog } from '../entities/audit-log.entity';
+import { SecurityAlert } from '../entities/security-alert.entity';
 import { InventoryModule } from '../inventory/inventory.module';
 import { OrdersModule } from '../orders/orders.module';
+import { AuditModule } from '../audit/audit.module';
+import { AuditService } from '../audit/audit.service';
+import { SecurityMonitorService } from '../audit/security-monitor.service';
 
 @Module({
   imports: [
@@ -18,12 +23,15 @@ import { OrdersModule } from '../orders/orders.module';
       Product,
       InventoryItem,
       Country,
+      AuditLog,
+      SecurityAlert,
     ]),
     InventoryModule,
     OrdersModule,
+    AuditModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [AdminService, AuditService, SecurityMonitorService],
   exports: [AdminService],
 })
 export class AdminModule {}

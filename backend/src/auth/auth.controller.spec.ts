@@ -58,12 +58,17 @@ describe('AuthController', () => {
         password: 'password',
       };
 
+      const mockRequest = {
+        headers: { 'user-agent': 'test-agent' },
+        connection: { remoteAddress: '127.0.0.1' },
+      } as any;
+
       mockAuthService.login.mockResolvedValue(mockAuthResult);
 
-      const result = await controller.login(loginDto);
+      const result = await controller.login(loginDto, mockRequest);
 
       expect(result).toEqual(mockAuthResult);
-      expect(authService.login).toHaveBeenCalledWith(loginDto);
+      expect(authService.login).toHaveBeenCalledWith(loginDto, '127.0.0.1', 'test-agent');
     });
   });
 
@@ -76,12 +81,17 @@ describe('AuthController', () => {
         password: 'password123',
       };
 
+      const mockRequest = {
+        headers: { 'user-agent': 'test-agent' },
+        connection: { remoteAddress: '127.0.0.1' },
+      } as any;
+
       mockAuthService.register.mockResolvedValue(mockAuthResult);
 
-      const result = await controller.register(registerDto);
+      const result = await controller.register(registerDto, mockRequest);
 
       expect(result).toEqual(mockAuthResult);
-      expect(authService.register).toHaveBeenCalledWith(registerDto);
+      expect(authService.register).toHaveBeenCalledWith(registerDto, '127.0.0.1', 'test-agent');
     });
   });
 

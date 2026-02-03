@@ -12,7 +12,7 @@ const categories = [
     icon: '⚡',
     gradient: 'from-primary-500 via-secondary-500 to-accent-500',
     glowColor: 'primary-500',
-    bgPattern: 'gaming-gradient',
+    bgPattern: 'bg-gaming-gradient',
   },
   {
     segment: ProductSegment.MID_RANGE,
@@ -22,7 +22,7 @@ const categories = [
     icon: '🎯',
     gradient: 'from-secondary-500 via-accent-500 to-primary-500',
     glowColor: 'secondary-500',
-    bgPattern: 'neon-gradient',
+    bgPattern: 'bg-neon-gradient',
   },
   {
     segment: ProductSegment.REFURBISHED,
@@ -32,7 +32,7 @@ const categories = [
     icon: '🔄',
     gradient: 'from-accent-500 via-primary-500 to-secondary-500',
     glowColor: 'accent-500',
-    bgPattern: 'cyber-grid',
+    bgPattern: 'bg-cyber-grid',
   },
 ]
 
@@ -60,7 +60,7 @@ export function CategoryGrid() {
                 <div className={`text-6xl mb-2 filter drop-shadow-lg animate-float`} style={{ animationDelay: `${index * 0.5}s` }}>
                   {category.icon}
                 </div>
-                <div className={`absolute top-0 left-0 text-6xl opacity-50 blur-sm animate-pulse text-${category.glowColor}`}>
+                <div className={`absolute top-0 left-0 text-6xl opacity-50 blur-sm animate-pulse text-primary-500`}>
                   {category.icon}
                 </div>
               </div>

@@ -47,6 +47,7 @@ const config: Config = {
           800: '#166534',
           900: '#14532d',
         },
+        // Gaming neon colors
         neon: {
           blue: '#00d4ff',
           purple: '#b347ff',
@@ -55,6 +56,7 @@ const config: Config = {
           orange: '#ff8c47',
           cyan: '#47ffff',
         },
+        // Dark theme colors
         dark: {
           50: '#18181b',
           100: '#27272a',
@@ -69,9 +71,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        gaming: ['Orbitron', 'monospace'],
-        tech: ['Rajdhani', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        gaming: ['var(--font-orbitron)', 'Orbitron', 'monospace'],
+        tech: ['var(--font-rajdhani)', 'Rajdhani', 'sans-serif'],
       },
       screens: {
         'xs': '475px',
@@ -117,7 +119,7 @@ const config: Config = {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'cyber-grid': 'linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px)',
+        'cyber-grid': 'linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)',
         'gaming-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         'neon-gradient': 'linear-gradient(45deg, #00d4ff, #b347ff, #ff47b3)',
       },

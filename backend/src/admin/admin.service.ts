@@ -13,6 +13,9 @@ import { RevenueReportDto } from './dto/revenue-report.dto';
 import { InventoryService } from '../inventory/inventory.service';
 import { OrdersService } from '../orders/orders.service';
 import { UpdateStockDto } from '../inventory/dto/update-stock.dto';
+import { AuditService } from '../audit/audit.service';
+import { SecurityMonitorService } from '../audit/security-monitor.service';
+import { AuditAction, AuditResource, AuditSeverity } from '../entities/audit-log.entity';
 
 @Injectable()
 export class AdminService {
@@ -29,6 +32,8 @@ export class AdminService {
     private readonly countryRepository: Repository<Country>,
     private readonly inventoryService: InventoryService,
     private readonly ordersService: OrdersService,
+    private readonly auditService: AuditService,
+    private readonly securityMonitor: SecurityMonitorService,
   ) {}
 
   async getDashboardStats(): Promise<DashboardStatsDto> {
@@ -384,22 +389,43 @@ export class AdminService {
     return sanitizedUser;
   }
 
-  async updateUserRole(id: string, role: UserRole) {
+  async updateUserRole(id: string, role: UserRole, adminUserId: string) {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
+    const oldRole = user.role;
+
+    // Security check for privilege escalation
+    await this.securityMonitor.checkPrivilegeEscalation(adminUserId, id, role);
+
     user.role = role;
-    await this.userRepository.save(user);
+    const updatedUser = await this.userRepository.save(user);
+
+    // Log the role change
+    await this.auditService.logAction({
+      userId: adminUserId,
+      action: AuditAction.ROLE_CHANGE,
+      resource: AuditResource.USER,
+      resourceId: id,
+      severity: AuditSeverity.HIGH,
+      description: `Changed user role from ${oldRole} to ${role}`,
+      metadata: {
+        targetUserId: id,
+        oldRole,
+        newRole: role,
+      },
+      success: true,
+    });
 
     // Remove password hash
-    const { passwordHash, ...sanitizedUser } = user;
+    const { passwordHash, ...sanitizedUser } = updatedUser;
     return sanitizedUser;
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: string, adminUserId: string) {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
@@ -413,6 +439,22 @@ export class AdminService {
     }
 
     await this.userRepository.remove(user);
+
+    // Log the user deletion
+    await this.auditService.logAction({
+      userId: adminUserId,
+      action: AuditAction.DELETE,
+      resource: AuditResource.USER,
+      resourceId: id,
+      severity: AuditSeverity.HIGH,
+      description: `Deleted user account`,
+      metadata: {
+        deletedUserEmail: user.email,
+        deletedUserPhone: user.phone,
+        deletedUserRole: user.role,
+      },
+      success: true,
+    });
   }
 
   // Order Management Methods
@@ -456,8 +498,27 @@ export class AdminService {
     return order;
   }
 
-  async updateOrderStatus(id: string, status: OrderStatus, trackingNumber?: string) {
-    return this.ordersService.updateStatus(id, { status, trackingNumber });
+  async updateOrderStatus(id: string, status: OrderStatus, trackingNumber?: string, adminUserId?: string) {
+    const result = await this.ordersService.updateStatus(id, { status, trackingNumber });
+
+    // Log the order status change
+    if (adminUserId) {
+      await this.auditService.logAction({
+        userId: adminUserId,
+        action: AuditAction.ORDER_STATUS_CHANGE,
+        resource: AuditResource.ORDER,
+        resourceId: id,
+        severity: AuditSeverity.MEDIUM,
+        description: `Updated order status to ${status}`,
+        metadata: {
+          newStatus: status,
+          trackingNumber,
+        },
+        success: true,
+      });
+    }
+
+    return result;
   }
 
   // Inventory Management Methods
@@ -469,12 +530,51 @@ export class AdminService {
     return this.inventoryService.getLowStockItems(threshold);
   }
 
-  async updateStock(productId: string, updateStockDto: UpdateStockDto) {
-    return this.inventoryService.updateStock(productId, updateStockDto);
+  async updateStock(productId: string, updateStockDto: UpdateStockDto, adminUserId?: string) {
+    const result = await this.inventoryService.updateStock(productId, updateStockDto);
+
+    // Log the stock update
+    if (adminUserId) {
+      await this.auditService.logAction({
+        userId: adminUserId,
+        action: AuditAction.STOCK_ADJUSTMENT,
+        resource: AuditResource.INVENTORY,
+        resourceId: productId,
+        severity: AuditSeverity.MEDIUM,
+        description: `Updated stock quantity`,
+        metadata: {
+          newQuantity: updateStockDto.quantity,
+          warehouseLocation: updateStockDto.warehouseLocation,
+          supplierId: updateStockDto.supplierId,
+        },
+        success: true,
+      });
+    }
+
+    return result;
   }
 
-  async adjustStock(productId: string, adjustment: number, reason?: string) {
-    return this.inventoryService.adjustStock(productId, adjustment, reason);
+  async adjustStock(productId: string, adjustment: number, reason?: string, adminUserId?: string) {
+    const result = await this.inventoryService.adjustStock(productId, adjustment, reason);
+
+    // Log the stock adjustment
+    if (adminUserId) {
+      await this.auditService.logAction({
+        userId: adminUserId,
+        action: AuditAction.STOCK_ADJUSTMENT,
+        resource: AuditResource.INVENTORY,
+        resourceId: productId,
+        severity: AuditSeverity.MEDIUM,
+        description: `Adjusted stock by ${adjustment}`,
+        metadata: {
+          adjustment,
+          reason,
+        },
+        success: true,
+      });
+    }
+
+    return result;
   }
 
   // Supplier Management Methods

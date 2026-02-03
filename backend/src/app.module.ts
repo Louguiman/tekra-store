@@ -15,6 +15,8 @@ import { ProductSegmentsModule } from './product-segments/product-segments.modul
 import { OrdersModule } from './orders/orders.module';
 import { DeliveryModule } from './delivery/delivery.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AuditModule } from './audit/audit.module';
+import { DataImportExportModule } from './data-import-export/data-import-export.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -36,6 +38,8 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     OrdersModule,
     DeliveryModule,
     NotificationsModule,
+    AuditModule,
+    DataImportExportModule,
   ],
   controllers: [AppController],
   providers: [

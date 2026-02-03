@@ -130,7 +130,7 @@ export function Footer() {
                 <WhatsAppButton 
                   variant="button" 
                   size="sm" 
-                  className="bg-transparent border border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-white px-4 py-2 text-sm font-tech transition-all duration-300"
+                  className="bg-transparent border border-green-500 text-green-500 hover:bg-green-500 hover:text-white px-4 py-2 text-sm font-tech transition-all duration-300"
                 />
               </div>
             </div>
@@ -161,7 +161,7 @@ export function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-dark-600 font-tech text-center md:text-left">
               &copy; 2024 WestTech Gaming. All rights reserved. 
-              <span className="text-neon-blue ml-2">Level up responsibly.</span>
+              <span className="text-blue-400 ml-2">Level up responsibly.</span>
             </p>
             <div className="flex items-center gap-6 text-sm font-tech">
               <Link href="/privacy" className="text-dark-600 hover:text-primary-500 transition-colors duration-300">

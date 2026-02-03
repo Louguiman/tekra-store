@@ -15,7 +15,7 @@ interface ProductCardProps {
 const gradeColors = {
   [RefurbishedGrade.A]: 'bg-gradient-to-r from-accent-500 to-accent-600 text-white',
   [RefurbishedGrade.B]: 'bg-gradient-to-r from-secondary-500 to-secondary-600 text-white',
-  [RefurbishedGrade.C]: 'bg-gradient-to-r from-neon-orange to-secondary-500 text-white',
+  [RefurbishedGrade.C]: 'bg-gradient-to-r from-orange-500 to-secondary-500 text-white',
 }
 
 export function ProductCard({ product, countryCode }: ProductCardProps) {
@@ -49,7 +49,7 @@ export function ProductCard({ product, countryCode }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.slug}`} className="group">
-      <div className="product-card hover-lift hover-glow">
+      <div className="product-card hover-lift hover-glow group">
         {/* Gaming Product Image */}
         <div className="relative aspect-square bg-gradient-to-br from-dark-200/50 to-dark-300/50 overflow-hidden rounded-t-xl">
           {primaryImage ? (
@@ -75,7 +75,7 @@ export function ProductCard({ product, countryCode }: ProductCardProps) {
               </span>
             )}
             {originalPrice && (
-              <span className="bg-gradient-to-r from-neon-pink to-secondary-500 text-white px-3 py-1 text-xs font-gaming font-bold rounded-full shadow-lg animate-pulse">
+              <span className="bg-gradient-to-r from-pink-500 to-secondary-500 text-white px-3 py-1 text-xs font-gaming font-bold rounded-full shadow-lg animate-pulse">
                 SALE
               </span>
             )}
@@ -139,7 +139,7 @@ export function ProductCard({ product, countryCode }: ProductCardProps) {
 
           {/* Gaming Stock Info */}
           {isInStock && stockQuantity <= 5 && stockQuantity > 0 && (
-            <div className="flex items-center mb-4 text-xs text-neon-orange font-tech font-semibold">
+            <div className="flex items-center mb-4 text-xs text-orange-500 font-tech font-semibold">
               <svg className="w-4 h-4 mr-2 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
