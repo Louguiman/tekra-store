@@ -163,6 +163,59 @@ export const api = createApi({
       query: (supplierId) => `/admin/suppliers/${supplierId}/products`,
       providesTags: ['Admin'],
     }),
+
+    // Admin Validation Management
+    getPendingValidations: builder.query<PaginatedValidationItems, ValidationFilters>({
+      query: (filters) => ({
+        url: '/admin/validations',
+        params: filters,
+      }),
+      providesTags: ['Admin'],
+    }),
+    getValidationById: builder.query<ValidationItem, string>({
+      query: (id) => `/admin/validations/${id}`,
+      providesTags: ['Admin'],
+    }),
+    getValidationStats: builder.query<ValidationStats, void>({
+      query: () => '/admin/validations/stats',
+      providesTags: ['Admin'],
+    }),
+    getFeedbackCategories: builder.query<FeedbackCategory[], void>({
+      query: () => '/admin/validations/feedback/categories',
+      providesTags: ['Admin'],
+    }),
+    approveValidation: builder.mutation<{ success: boolean; message: string }, ApprovalRequest>({
+      query: ({ id, ...body }) => ({
+        url: `/admin/validations/${id}/approve`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Admin'],
+    }),
+    rejectValidation: builder.mutation<{ success: boolean; message: string }, RejectionRequest>({
+      query: ({ id, ...body }) => ({
+        url: `/admin/validations/${id}/reject`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Admin'],
+    }),
+    bulkApproveValidations: builder.mutation<BulkValidationResult, BulkApprovalRequest>({
+      query: (body) => ({
+        url: '/admin/validations/bulk/approve',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Admin'],
+    }),
+    bulkRejectValidations: builder.mutation<BulkValidationResult, BulkRejectionRequest>({
+      query: (body) => ({
+        url: '/admin/validations/bulk/reject',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Admin'],
+    }),
     // Countries
     getCountries: builder.query<Country[], void>({
       query: () => '/countries',
@@ -980,6 +1033,130 @@ export interface UpdateStockRequest {
 export interface SupplierResponse {
   id: string
   productCount: number
+}
+
+// Admin Validation Management Types
+export interface ValidationFilters {
+  supplierId?: string
+  contentType?: 'text' | 'image' | 'pdf' | 'voice'
+  priority?: 'low' | 'medium' | 'high'
+  category?: string
+  minConfidence?: number
+  maxConfidence?: number
+  page?: number
+  limit?: number
+}
+
+export interface ValidationItem {
+  id: string
+  submissionId: string
+  supplierId: string
+  supplierName: string
+  originalContent: {
+    type: 'text' | 'image' | 'pdf' | 'voice'
+    content: string
+    mediaUrl?: string
+  }
+  extractedProduct: ExtractedProduct
+  suggestedActions: ValidationAction[]
+  priority: 'low' | 'medium' | 'high'
+  confidenceScore: number
+  createdAt: string
+  estimatedProcessingTime: number
+  relatedValidations?: string[]
+}
+
+export interface ExtractedProduct {
+  name: string
+  brand?: string
+  category?: string
+  condition?: string
+  grade?: string
+  price?: number
+  currency?: string
+  quantity?: number
+  specifications?: Record<string, string>
+  confidenceScore: number
+  extractionMetadata: {
+    sourceType: 'text' | 'image' | 'pdf' | 'voice'
+    processingTime: number
+    aiModel: string
+    extractedFields: string[]
+  }
+}
+
+export interface ValidationAction {
+  type: 'create' | 'update' | 'merge'
+  targetProductId?: string
+  confidence: number
+  reasoning: string
+  suggestedEdits?: Partial<ExtractedProduct>
+}
+
+export interface PaginatedValidationItems {
+  items: ValidationItem[]
+  total: number
+  page: number
+  limit: number
+  hasNext: boolean
+  hasPrevious: boolean
+}
+
+export interface ValidationStats {
+  totalPending: number
+  highPriority: number
+  avgProcessingTime: number
+  approvalRate: number
+  commonRejectionReasons: Array<{ reason: string; count: number }>
+}
+
+export interface FeedbackCategory {
+  id: string
+  name: string
+  description: string
+  subcategories: string[]
+}
+
+export interface ApprovalRequest {
+  id: string
+  edits?: Partial<ExtractedProduct>
+  notes?: string
+}
+
+export interface RejectionRequest {
+  id: string
+  feedback: {
+    category: string
+    subcategory?: string
+    description: string
+    severity: string
+    suggestedImprovement?: string
+  }
+  notes?: string
+}
+
+export interface BulkApprovalRequest {
+  validationIds: string[]
+  globalEdits?: Record<string, Partial<ExtractedProduct>>
+  notes?: string
+}
+
+export interface BulkRejectionRequest {
+  validationIds: string[]
+  feedback: {
+    category: string
+    subcategory?: string
+    description: string
+    severity: string
+    suggestedImprovement?: string
+  }
+  notes?: string
+}
+
+export interface BulkValidationResult {
+  successful: string[]
+  failed: Array<{ id: string; error: string }>
+  totalProcessed: number
 }
 
 export interface SupplierProductResponse {

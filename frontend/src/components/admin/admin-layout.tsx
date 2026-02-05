@@ -100,6 +100,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   Inventory
                 </Link>
                 <Link
+                  href="/admin/validations"
+                  className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                >
+                  Validations
+                </Link>
+                <Link
                   href="/admin/analytics"
                   className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
                 >

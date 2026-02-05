@@ -26,6 +26,10 @@ export enum AuditAction {
   AI_PROCESSING = 'ai_processing',
   HUMAN_VALIDATION = 'human_validation',
   INVENTORY_INTEGRATION = 'inventory_integration',
+  APPROVE = 'approve',
+  REJECT = 'reject',
+  BULK_APPROVE = 'bulk_approve',
+  BULK_REJECT = 'bulk_reject',
 }
 
 export enum AuditResource {
