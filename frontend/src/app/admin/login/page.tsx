@@ -66,38 +66,61 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Admin Login
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to access the admin dashboard
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div className="mb-4">
-              <label htmlFor="loginType" className="block text-sm font-medium text-gray-700">
-                Login with
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Animated Gaming Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-dark-50 via-dark-100 to-dark-200"></div>
+      
+      {/* Floating gaming elements */}
+      <div className="absolute top-20 left-10 w-32 h-32 bg-primary-500/20 rounded-full blur-2xl animate-float"></div>
+      <div className="absolute bottom-20 right-10 w-48 h-48 bg-secondary-500/20 rounded-full blur-2xl animate-float" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-1/2 right-1/3 w-24 h-24 bg-accent-500/20 rounded-full blur-xl animate-float" style={{ animationDelay: '4s' }}></div>
+
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md px-4">
+        <div className="card-gaming p-8 md:p-10">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-block mb-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-gaming font-bold mb-2">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
+                ADMIN ACCESS
+              </span>
+            </h2>
+            <p className="text-dark-600 font-tech">
+              Sign in to command center
+            </p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Login Type Selector */}
+            <div>
+              <label htmlFor="loginType" className="block text-sm font-tech font-semibold text-dark-700 mb-2">
+                Login Method
               </label>
               <select
                 id="loginType"
                 name="loginType"
                 value={formData.loginType}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 bg-dark-50 border-2 border-dark-200 rounded-lg font-tech text-dark-800 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
               >
-                <option value="email">Email</option>
-                <option value="phone">Phone</option>
+                <option value="email">📧 Email Address</option>
+                <option value="phone">📱 Phone Number</option>
               </select>
             </div>
 
+            {/* Email/Phone Input */}
             {formData.loginType === 'email' ? (
-              <div className="mb-4">
-                <label htmlFor="email" className="sr-only">
-                  Email address
+              <div>
+                <label htmlFor="email" className="block text-sm font-tech font-semibold text-dark-700 mb-2">
+                  Email Address
                 </label>
                 <input
                   id="email"
@@ -107,14 +130,14 @@ export default function AdminLoginPage() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
+                  className="w-full px-4 py-3 bg-dark-50 border-2 border-dark-200 rounded-lg font-tech text-dark-800 placeholder-dark-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="admin@example.com"
                 />
               </div>
             ) : (
-              <div className="mb-4">
-                <label htmlFor="phone" className="sr-only">
-                  Phone number
+              <div>
+                <label htmlFor="phone" className="block text-sm font-tech font-semibold text-dark-700 mb-2">
+                  Phone Number
                 </label>
                 <input
                   id="phone"
@@ -124,14 +147,15 @@ export default function AdminLoginPage() {
                   required
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Phone number"
+                  className="w-full px-4 py-3 bg-dark-50 border-2 border-dark-200 rounded-lg font-tech text-dark-800 placeholder-dark-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="+221 XX XXX XX XX"
                 />
               </div>
             )}
 
+            {/* Password Input */}
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label htmlFor="password" className="block text-sm font-tech font-semibold text-dark-700 mb-2">
                 Password
               </label>
               <input
@@ -142,32 +166,71 @@ export default function AdminLoginPage() {
                 required
                 value={formData.password}
                 onChange={handleInputChange}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                className="w-full px-4 py-3 bg-dark-50 border-2 border-dark-200 rounded-lg font-tech text-dark-800 placeholder-dark-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                placeholder="••••••••"
               />
             </div>
-          </div>
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-700">{error}</div>
-            </div>
-          )}
+            {/* Error Message */}
+            {error && (
+              <div className="relative">
+                <div className="absolute inset-0 bg-red-500/20 rounded-lg blur-xl"></div>
+                <div className="relative bg-red-50 border-2 border-red-500 rounded-lg p-4">
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm font-tech text-red-700">{error}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
-          <div>
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full relative group"
             >
-              {isLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              ) : (
-                'Sign in'
-              )}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+              <div className="relative bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-gaming font-bold py-4 px-6 rounded-lg shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>AUTHENTICATING...</span>
+                  </div>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    ENTER COMMAND CENTER
+                  </span>
+                )}
+              </div>
             </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-dark-200">
+            <p className="text-center text-sm font-tech text-dark-500">
+              🔒 Secure admin authentication
+            </p>
           </div>
-        </form>
+        </div>
+
+        {/* Back to Home Link */}
+        <div className="text-center mt-6">
+          <button
+            onClick={() => router.push('/')}
+            className="inline-flex items-center gap-2 text-dark-600 hover:text-primary-500 font-tech transition-colors duration-300"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Homepage
+          </button>
+        </div>
       </div>
     </div>
   )
