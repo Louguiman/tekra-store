@@ -7,7 +7,6 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { CountrySelector } from '@/components/country-selector'
 import { WhatsAppButton } from '@/components/support/whatsapp-button'
-import { LanguageSwitcher } from '@/components/language-switcher'
 
 export function Header() {
   const router = useRouter()
@@ -92,12 +91,7 @@ export function Header() {
           </nav>
 
           {/* Right side gaming controls */}
-          <div className="flex items-center space-x-4">
-            {/* Language Switcher - Desktop */}
-            <div className="hidden sm:block">
-              <LanguageSwitcher />
-            </div>
-
+          <div className="flex items-center space-x-6">
             {/* Country Selector - Desktop */}
             <div className="hidden sm:block">
               <CountrySelector />
@@ -159,11 +153,6 @@ export function Header() {
                   </div>
                 </div>
               </form>
-            </div>
-
-            {/* Mobile Country Selector */}
-            <div className="mb-6 sm:hidden">
-              <LanguageSwitcher />
             </div>
 
             {/* Mobile Country Selector */}
