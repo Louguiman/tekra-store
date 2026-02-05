@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import TemplateForm, { TemplateFormData } from '@/components/admin/template-form';
 import TemplateValidator from '@/components/admin/template-validator';
+import TemplateImprovements from '@/components/admin/template-improvements';
 
 interface Template extends TemplateFormData {
   id: string;
@@ -38,7 +39,7 @@ export default function TemplateDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'details' | 'analytics' | 'validator' | 'edit'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'analytics' | 'validator' | 'improvements' | 'edit'>('details');
 
   useEffect(() => {
     if (templateId) {
@@ -264,6 +265,16 @@ export default function TemplateDetailPage() {
             Analytics
           </button>
           <button
+            onClick={() => setActiveTab('improvements')}
+            className={`pb-2 px-1 ${
+              activeTab === 'improvements'
+                ? 'border-b-2 border-blue-600 text-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Improvements
+          </button>
+          <button
             onClick={() => setActiveTab('validator')}
             className={`pb-2 px-1 ${
               activeTab === 'validator'
@@ -486,6 +497,16 @@ export default function TemplateDetailPage() {
         <TemplateValidator
           templateId={templateId}
           templateFields={template.fields}
+        />
+      )}
+
+      {activeTab === 'improvements' && (
+        <TemplateImprovements
+          templateId={templateId}
+          onImprovementApplied={() => {
+            fetchTemplate();
+            fetchAnalytics();
+          }}
         />
       )}
 

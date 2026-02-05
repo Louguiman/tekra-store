@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SuppliersController } from './suppliers.controller';
 import { SuppliersService } from './suppliers.service';
 import { TemplateService } from './template.service';
+import { TemplateNotificationService } from './template-notification.service';
+import { TemplateImprovementService } from './template-improvement.service';
 import { Supplier } from '../entities/supplier.entity';
 import { SupplierSubmission } from '../entities/supplier-submission.entity';
 import { ProcessingLog } from '../entities/processing-log.entity';
@@ -22,7 +24,17 @@ import { AuditModule } from '../audit/audit.module';
     AuditModule,
   ],
   controllers: [SuppliersController],
-  providers: [SuppliersService, TemplateService],
-  exports: [SuppliersService, TemplateService],
+  providers: [
+    SuppliersService,
+    TemplateService,
+    TemplateNotificationService,
+    TemplateImprovementService,
+  ],
+  exports: [
+    SuppliersService,
+    TemplateService,
+    TemplateNotificationService,
+    TemplateImprovementService,
+  ],
 })
 export class SuppliersModule {}

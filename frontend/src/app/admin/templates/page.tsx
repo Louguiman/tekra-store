@@ -131,12 +131,20 @@ export default function TemplatesPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Supplier Templates</h1>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Create Template
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => router.push('/admin/templates/analytics')}
+            className="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50"
+          >
+            View Analytics
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Create Template
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

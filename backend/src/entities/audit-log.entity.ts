@@ -31,6 +31,7 @@ export enum AuditAction {
   REJECT = 'reject',
   BULK_APPROVE = 'bulk_approve',
   BULK_REJECT = 'bulk_reject',
+  AUTO_APPROVE = 'auto_approve',
 }
 
 export enum AuditResource {

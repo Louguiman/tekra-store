@@ -17,6 +17,7 @@ import { WhatsappService, WhatsAppWebhookPayload } from './whatsapp.service';
 import { RateLimiterService } from './rate-limiter.service';
 import { ErrorRecoveryService } from './error-recovery.service';
 import { HealthMonitoringService } from './health-monitoring.service';
+import { PipelineOrchestratorService } from './pipeline-orchestrator.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -30,6 +31,7 @@ export class WhatsappController {
     private readonly rateLimiterService: RateLimiterService,
     private readonly errorRecoveryService: ErrorRecoveryService,
     private readonly healthMonitoringService: HealthMonitoringService,
+    private readonly pipelineOrchestratorService: PipelineOrchestratorService,
   ) {}
 
   @Post('webhook')
@@ -85,6 +87,15 @@ export class WhatsappController {
       
       if (!result.processed) {
         throw new BadRequestException(result.error || 'Failed to process message');
+      }
+
+      // Trigger pipeline processing asynchronously (don't wait for completion)
+      if (result.submissionId) {
+        // Process in background without blocking webhook response
+        this.pipelineOrchestratorService.processSubmissionPipeline(result.submissionId)
+          .catch(error => {
+            console.error(`Background pipeline processing failed for ${result.submissionId}:`, error.message);
+          });
       }
 
       return {
@@ -253,5 +264,44 @@ export class WhatsappController {
       success: true,
       message: 'Submission marked as permanently failed',
     };
+  }
+
+  // Pipeline Orchestration Endpoints
+
+  @Get('pipeline/stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  async getPipelineStats() {
+    return this.pipelineOrchestratorService.getPipelineStats();
+  }
+
+  @Post('pipeline/process/:submissionId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  async triggerPipelineProcessing(@Param('submissionId') submissionId: string) {
+    try {
+      await this.pipelineOrchestratorService.triggerPipelineProcessing(submissionId);
+      return {
+        success: true,
+        message: 'Pipeline processing triggered successfully',
+      };
+    } catch (error) {
+      throw new BadRequestException(`Pipeline processing failed: ${error.message}`);
+    }
+  }
+
+  @Post('pipeline/reprocess/:submissionId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async reprocessFailedSubmission(@Param('submissionId') submissionId: string) {
+    try {
+      await this.pipelineOrchestratorService.reprocessFailedSubmission(submissionId);
+      return {
+        success: true,
+        message: 'Submission reprocessing triggered successfully',
+      };
+    } catch (error) {
+      throw new BadRequestException(`Reprocessing failed: ${error.message}`);
+    }
   }
 }

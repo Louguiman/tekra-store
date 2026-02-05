@@ -7,6 +7,7 @@ import { Supplier } from '../entities/supplier.entity';
 import { SupplierSubmission } from '../entities/supplier-submission.entity';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction, AuditResource } from '../entities/audit-log.entity';
+import { TemplateNotificationService } from './template-notification.service';
 import {
   CreateTemplateDto,
   UpdateTemplateDto,
@@ -43,6 +44,7 @@ export class TemplateService {
     @InjectRepository(SupplierSubmission)
     private supplierSubmissionRepository: Repository<SupplierSubmission>,
     private auditService: AuditService,
+    private templateNotificationService: TemplateNotificationService,
   ) {}
 
   /**
@@ -160,15 +162,36 @@ export class TemplateService {
    */
   async update(id: string, updateTemplateDto: UpdateTemplateDto): Promise<SupplierTemplate> {
     const template = await this.findOne(id);
+    const oldVersion = template.version;
 
     // Validate fields if provided
     if (updateTemplateDto.fields) {
       this.validateTemplateFields(updateTemplateDto.fields);
     }
 
+    // Track changes for notification
+    const changes: string[] = [];
+
     // Increment version if fields are changed
     if (updateTemplateDto.fields) {
       template.version += 1;
+      changes.push('Template fields updated');
+    }
+
+    if (updateTemplateDto.name && updateTemplateDto.name !== template.name) {
+      changes.push(`Template name changed from "${template.name}" to "${updateTemplateDto.name}"`);
+    }
+
+    if (updateTemplateDto.type && updateTemplateDto.type !== template.type) {
+      changes.push(`Content type changed from "${template.type}" to "${updateTemplateDto.type}"`);
+    }
+
+    if (updateTemplateDto.exampleContent && updateTemplateDto.exampleContent !== template.exampleContent) {
+      changes.push('Example content updated');
+    }
+
+    if (updateTemplateDto.instructions && updateTemplateDto.instructions !== template.instructions) {
+      changes.push('Instructions updated');
     }
 
     Object.assign(template, updateTemplateDto);
@@ -182,8 +205,24 @@ export class TemplateService {
       metadata: {
         updates: updateTemplateDto,
         newVersion: updatedTemplate.version,
+        changes,
       },
     });
+
+    // Send notifications if there were significant changes
+    if (changes.length > 0 && updatedTemplate.version > oldVersion) {
+      try {
+        await this.templateNotificationService.notifyTemplateUpdate(
+          id,
+          oldVersion,
+          updatedTemplate.version,
+          changes,
+        );
+      } catch (error) {
+        console.error('Failed to send template update notifications:', error);
+        // Don't fail the update if notification fails
+      }
+    }
 
     return updatedTemplate;
   }
@@ -358,17 +397,16 @@ export class TemplateService {
     }
 
     // Create template submission record
-    const templateSubmission = this.templateSubmissionRepository.create({
-      template,
-      supplier,
-      submission: usageDto.submissionId ? { id: usageDto.submissionId } as SupplierSubmission : null,
-      result: usageDto.result,
-      confidenceScore: usageDto.confidenceScore,
-      validationErrors: usageDto.validationErrors || [],
-      extractedData: usageDto.extractedData || {},
-      processingTimeMs: usageDto.processingTimeMs,
-      feedback: usageDto.feedback,
-    });
+    const templateSubmission = new TemplateSubmission();
+    templateSubmission.template = template;
+    templateSubmission.supplier = supplier;
+    templateSubmission.submission = usageDto.submissionId ? { id: usageDto.submissionId } as SupplierSubmission : undefined;
+    templateSubmission.result = usageDto.result as SubmissionResult;
+    templateSubmission.confidenceScore = usageDto.confidenceScore;
+    templateSubmission.validationErrors = (usageDto.validationErrors || []) as FieldValidationError[];
+    templateSubmission.extractedData = usageDto.extractedData || {};
+    templateSubmission.processingTimeMs = usageDto.processingTimeMs;
+    templateSubmission.feedback = usageDto.feedback;
 
     await this.templateSubmissionRepository.save(templateSubmission);
 
@@ -467,7 +505,7 @@ export class TemplateService {
       }
 
       // Match category with supplier's preferred categories
-      if (supplier.performanceMetrics?.preferredCategories?.includes(template.category)) {
+      if (supplier.preferredCategories?.includes(template.category)) {
         score += 30;
         reasons.push('Matches your preferred categories');
       }

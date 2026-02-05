@@ -13,6 +13,8 @@ import {
 } from '@nestjs/common';
 import { SuppliersService, CreateSupplierDto, UpdateSupplierDto } from './suppliers.service';
 import { TemplateService } from './template.service';
+import { TemplateNotificationService } from './template-notification.service';
+import { TemplateImprovementService } from './template-improvement.service';
 import {
   CreateTemplateDto,
   UpdateTemplateDto,
@@ -32,6 +34,8 @@ export class SuppliersController {
   constructor(
     private readonly suppliersService: SuppliersService,
     private readonly templateService: TemplateService,
+    private readonly templateNotificationService: TemplateNotificationService,
+    private readonly templateImprovementService: TemplateImprovementService,
   ) {}
 
   @Post()
@@ -251,5 +255,80 @@ export class SuppliersController {
     @Body('feedback') feedback: string,
   ) {
     return this.templateService.provideFeedback(templateId, supplierId, feedback);
+  }
+
+  // ==================== Template Improvement Endpoints ====================
+
+  @Get('templates/:templateId/analysis')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  analyzeTemplate(@Param('templateId') templateId: string) {
+    return this.templateImprovementService.analyzeTemplate(templateId);
+  }
+
+  @Get('templates/analysis/all')
+  @Roles(UserRole.ADMIN)
+  analyzeAllTemplates() {
+    return this.templateImprovementService.analyzeAllTemplates();
+  }
+
+  @Post('templates/:templateId/improvements/apply')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  applyImprovement(
+    @Param('templateId') templateId: string,
+    @Body() improvement: any,
+  ) {
+    return this.templateImprovementService.applyImprovement(templateId, improvement);
+  }
+
+  // ==================== Template Notification Endpoints ====================
+
+  @Post('templates/:templateId/notify-update')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  notifyTemplateUpdate(
+    @Param('templateId') templateId: string,
+    @Body('oldVersion') oldVersion: number,
+    @Body('newVersion') newVersion: number,
+    @Body('changes') changes: string[],
+  ) {
+    return this.templateNotificationService.notifyTemplateUpdate(
+      templateId,
+      oldVersion,
+      newVersion,
+      changes,
+    );
+  }
+
+  @Post(':id/template-recommendation')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @HttpCode(HttpStatus.OK)
+  sendTemplateRecommendation(
+    @Param('id') supplierId: string,
+    @Body('templateId') templateId: string,
+    @Body('reason') reason: string,
+  ) {
+    return this.templateNotificationService.sendTemplateRecommendation(
+      supplierId,
+      templateId,
+      reason,
+    );
+  }
+
+  @Post(':id/validation-feedback')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @HttpCode(HttpStatus.OK)
+  sendValidationFeedback(
+    @Param('id') supplierId: string,
+    @Body('templateId') templateId: string,
+    @Body('feedback') feedback: string,
+    @Body('suggestions') suggestions: string[],
+  ) {
+    return this.templateNotificationService.sendValidationFeedback(
+      supplierId,
+      templateId,
+      feedback,
+      suggestions,
+    );
   }
 }
