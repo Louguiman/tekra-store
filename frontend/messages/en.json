@@ -1,0 +1,258 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "selectCountry": "Select Country",
+    "currency": "Currency",
+    "language": "Language"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "categories": "Categories",
+    "cart": "Cart",
+    "orders": "Orders",
+    "support": "Support",
+    "admin": "Admin",
+    "login": "Login",
+    "logout": "Logout",
+    "myAccount": "My Account"
+  },
+  "home": {
+    "hero": {
+      "title": "LEVEL UP",
+      "subtitle": "YOUR TECH GAME",
+      "description": "Experience the future of technology with premium gaming gear and cutting-edge tech products across West Africa",
+      "exploreArsenal": "EXPLORE ARSENAL",
+      "premiumGaming": "PREMIUM GAMING"
+    },
+    "stats": {
+      "products": "Gaming Products",
+      "countries": "Countries Served",
+      "support": "Gaming Support",
+      "satisfaction": "Satisfaction Rate"
+    },
+    "sections": {
+      "featured": "FEATURED GEAR",
+      "featuredDesc": "Handpicked premium products for the ultimate gaming experience",
+      "deals": "EPIC DEALS",
+      "dealsTag": "🔥 EPIC DEALS",
+      "dealsTitle": "LEGENDARY SAVINGS",
+      "dealsDesc": "Premium refurbished gear at unbeatable prices. Quality guaranteed.",
+      "trending": "TRENDING NOW",
+      "trendingTag": "📈 TRENDING NOW",
+      "trendingTitle": "WHAT GAMERS LOVE",
+      "trendingDesc": "Most popular products flying off the shelves",
+      "newArrivals": "NEW ARRIVALS",
+      "newArrivalsTag": "✨ JUST DROPPED",
+      "newArrivalsTitle": "NEW ARRIVALS",
+      "newArrivalsDesc": "Fresh tech just landed. Be the first to level up.",
+      "categories": "GAMING ARSENAL",
+      "categoriesDesc": "Choose your weapon. Dominate the battlefield. Experience gaming like never before."
+    },
+    "features": {
+      "title": "WHY CHOOSE US",
+      "subtitle": "The ultimate gaming destination in West Africa",
+      "payment": {
+        "title": "INSTANT PAYMENT",
+        "desc": "Lightning-fast transactions with Orange Money, Wave, Moov, and international cards"
+      },
+      "delivery": {
+        "title": "WARP SPEED DELIVERY",
+        "desc": "Ultra-fast delivery across West Africa with real-time tracking and secure packaging"
+      },
+      "quality": {
+        "title": "LEGENDARY QUALITY",
+        "desc": "Premium new and certified refurbished products with extended warranty protection"
+      }
+    },
+    "testimonials": {
+      "title": "GAMERS SPEAK",
+      "subtitle": "Join thousands of satisfied gamers across West Africa",
+      "review1": "Best gaming store in Senegal! Fast delivery and authentic products. My RTX 4090 arrived in perfect condition.",
+      "review2": "Amazing refurbished laptops! Got a Grade A MacBook Pro at 40% off. Works like new and came with warranty.",
+      "review3": "Customer support is incredible! They helped me choose the perfect gaming setup for my budget. Highly recommend!",
+      "customer1": "Amadou K., Dakar",
+      "customer2": "Fatou D., Abidjan",
+      "customer3": "Ibrahim M., Bamako"
+    },
+    "cta": {
+      "title": "READY TO DOMINATE?",
+      "subtitle": "Join thousands of gamers across West Africa who've upgraded their setup with WestTech Gaming",
+      "startShopping": "START SHOPPING",
+      "getSupport": "GET SUPPORT"
+    },
+    "buttons": {
+      "viewAll": "VIEW ALL PRODUCTS",
+      "exploreDeals": "EXPLORE ALL DEALS",
+      "seeNewArrivals": "SEE ALL NEW ARRIVALS"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "allProducts": "All Products",
+    "featured": "Featured",
+    "trending": "Trending",
+    "newArrivals": "New Arrivals",
+    "deals": "Deals",
+    "filters": "Filters",
+    "sortBy": "Sort By",
+    "priceRange": "Price Range",
+    "condition": "Condition",
+    "brand": "Brand",
+    "category": "Category",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "viewDetails": "View Details",
+    "specifications": "Specifications",
+    "description": "Description",
+    "reviews": "Reviews",
+    "relatedProducts": "Related Products",
+    "new": "New",
+    "refurbished": "Refurbished",
+    "gradeA": "Grade A",
+    "gradeB": "Grade B",
+    "gradeC": "Grade C"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "continueShopping": "Continue Shopping",
+    "checkout": "Proceed to Checkout",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "total": "Total",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "updateCart": "Update Cart",
+    "itemAdded": "Item added to cart",
+    "itemRemoved": "Item removed from cart"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingAddress": "Shipping Address",
+    "billingAddress": "Billing Address",
+    "sameAsShipping": "Same as shipping address",
+    "paymentMethod": "Payment Method",
+    "deliveryMethod": "Delivery Method",
+    "orderSummary": "Order Summary",
+    "placeOrder": "Place Order",
+    "processing": "Processing...",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "city": "City",
+    "postalCode": "Postal Code",
+    "country": "Country"
+  },
+  "orders": {
+    "title": "My Orders",
+    "orderNumber": "Order Number",
+    "date": "Date",
+    "status": "Status",
+    "total": "Total",
+    "viewOrder": "View Order",
+    "trackOrder": "Track Order",
+    "orderDetails": "Order Details",
+    "items": "Items",
+    "shippingAddress": "Shipping Address",
+    "billingAddress": "Billing Address",
+    "paymentMethod": "Payment Method",
+    "orderHistory": "Order History",
+    "noOrders": "No orders yet",
+    "statuses": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "login": {
+      "title": "ADMIN ACCESS",
+      "subtitle": "Sign in to command center",
+      "loginMethod": "Login Method",
+      "email": "📧 Email Address",
+      "phone": "📱 Phone Number",
+      "emailPlaceholder": "admin@example.com",
+      "phonePlaceholder": "+221 XX XXX XX XX",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "ENTER COMMAND CENTER",
+      "authenticating": "AUTHENTICATING...",
+      "backToHome": "Back to Homepage",
+      "secureAuth": "🔒 Secure admin authentication"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "orders": "Orders",
+      "users": "Users",
+      "analytics": "Analytics",
+      "inventory": "Inventory",
+      "templates": "Templates",
+      "validations": "Validations",
+      "whatsapp": "WhatsApp"
+    },
+    "products": {
+      "title": "Product Management",
+      "addProduct": "Add Product",
+      "editProduct": "Edit Product",
+      "deleteProduct": "Delete Product",
+      "productList": "Product List",
+      "productDetails": "Product Details"
+    },
+    "whatsapp": {
+      "title": "WhatsApp Pipeline",
+      "dashboard": "Dashboard",
+      "submissions": "Submissions",
+      "errors": "Errors",
+      "recovery": "Recovery",
+      "health": "System Health"
+    }
+  },
+  "support": {
+    "title": "Customer Support",
+    "contactUs": "Contact Us",
+    "faq": "FAQ",
+    "helpCenter": "Help Center",
+    "whatsapp": "WhatsApp Support",
+    "email": "Email Support",
+    "phone": "Phone Support",
+    "hours": "Support Hours",
+    "available247": "Available 24/7"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "serverError": "Server error",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "badRequest": "Bad request",
+    "tryAgain": "Please try again",
+    "goHome": "Go to Homepage"
+  }
+}

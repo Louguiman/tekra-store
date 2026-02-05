@@ -1,0 +1,258 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "selectCountry": "Sélectionner le pays",
+    "currency": "Devise",
+    "language": "Langue"
+  },
+  "nav": {
+    "home": "Accueil",
+    "products": "Produits",
+    "categories": "Catégories",
+    "cart": "Panier",
+    "orders": "Commandes",
+    "support": "Support",
+    "admin": "Admin",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "myAccount": "Mon Compte"
+  },
+  "home": {
+    "hero": {
+      "title": "MONTEZ EN NIVEAU",
+      "subtitle": "VOTRE JEU TECH",
+      "description": "Découvrez le futur de la technologie avec des équipements gaming premium et des produits high-tech de pointe en Afrique de l'Ouest",
+      "exploreArsenal": "EXPLORER L'ARSENAL",
+      "premiumGaming": "GAMING PREMIUM"
+    },
+    "stats": {
+      "products": "Produits Gaming",
+      "countries": "Pays Desservis",
+      "support": "Support Gaming",
+      "satisfaction": "Taux de Satisfaction"
+    },
+    "sections": {
+      "featured": "ÉQUIPEMENT VEDETTE",
+      "featuredDesc": "Produits premium sélectionnés pour une expérience gaming ultime",
+      "deals": "OFFRES ÉPIQUES",
+      "dealsTag": "🔥 OFFRES ÉPIQUES",
+      "dealsTitle": "ÉCONOMIES LÉGENDAIRES",
+      "dealsDesc": "Équipement reconditionné premium à des prix imbattables. Qualité garantie.",
+      "trending": "TENDANCES ACTUELLES",
+      "trendingTag": "📈 TENDANCES ACTUELLES",
+      "trendingTitle": "CE QUE LES GAMERS ADORENT",
+      "trendingDesc": "Les produits les plus populaires qui s'envolent des étagères",
+      "newArrivals": "NOUVEAUTÉS",
+      "newArrivalsTag": "✨ VIENT D'ARRIVER",
+      "newArrivalsTitle": "NOUVEAUTÉS",
+      "newArrivalsDesc": "Nouvelle technologie vient d'arriver. Soyez le premier à monter en niveau.",
+      "categories": "ARSENAL GAMING",
+      "categoriesDesc": "Choisissez votre arme. Dominez le champ de bataille. Vivez le gaming comme jamais auparavant."
+    },
+    "features": {
+      "title": "POURQUOI NOUS CHOISIR",
+      "subtitle": "La destination gaming ultime en Afrique de l'Ouest",
+      "payment": {
+        "title": "PAIEMENT INSTANTANÉ",
+        "desc": "Transactions ultra-rapides avec Orange Money, Wave, Moov et cartes internationales"
+      },
+      "delivery": {
+        "title": "LIVRAISON ULTRA-RAPIDE",
+        "desc": "Livraison ultra-rapide en Afrique de l'Ouest avec suivi en temps réel et emballage sécurisé"
+      },
+      "quality": {
+        "title": "QUALITÉ LÉGENDAIRE",
+        "desc": "Produits neufs premium et reconditionnés certifiés avec protection de garantie étendue"
+      }
+    },
+    "testimonials": {
+      "title": "LES GAMERS PARLENT",
+      "subtitle": "Rejoignez des milliers de gamers satisfaits en Afrique de l'Ouest",
+      "review1": "Meilleur magasin gaming au Sénégal ! Livraison rapide et produits authentiques. Mon RTX 4090 est arrivé en parfait état.",
+      "review2": "Ordinateurs portables reconditionnés incroyables ! J'ai eu un MacBook Pro Grade A à -40%. Fonctionne comme neuf et est venu avec garantie.",
+      "review3": "Le support client est incroyable ! Ils m'ont aidé à choisir la configuration gaming parfaite pour mon budget. Je recommande vivement !",
+      "customer1": "Amadou K., Dakar",
+      "customer2": "Fatou D., Abidjan",
+      "customer3": "Ibrahim M., Bamako"
+    },
+    "cta": {
+      "title": "PRÊT À DOMINER ?",
+      "subtitle": "Rejoignez des milliers de gamers en Afrique de l'Ouest qui ont amélioré leur configuration avec WestTech Gaming",
+      "startShopping": "COMMENCER LES ACHATS",
+      "getSupport": "OBTENIR DU SUPPORT"
+    },
+    "buttons": {
+      "viewAll": "VOIR TOUS LES PRODUITS",
+      "exploreDeals": "EXPLORER TOUTES LES OFFRES",
+      "seeNewArrivals": "VOIR TOUTES LES NOUVEAUTÉS"
+    }
+  },
+  "products": {
+    "title": "Produits",
+    "allProducts": "Tous les Produits",
+    "featured": "En Vedette",
+    "trending": "Tendances",
+    "newArrivals": "Nouveautés",
+    "deals": "Offres",
+    "filters": "Filtres",
+    "sortBy": "Trier Par",
+    "priceRange": "Gamme de Prix",
+    "condition": "État",
+    "brand": "Marque",
+    "category": "Catégorie",
+    "inStock": "En Stock",
+    "outOfStock": "Rupture de Stock",
+    "addToCart": "Ajouter au Panier",
+    "buyNow": "Acheter Maintenant",
+    "viewDetails": "Voir les Détails",
+    "specifications": "Spécifications",
+    "description": "Description",
+    "reviews": "Avis",
+    "relatedProducts": "Produits Similaires",
+    "new": "Neuf",
+    "refurbished": "Reconditionné",
+    "gradeA": "Grade A",
+    "gradeB": "Grade B",
+    "gradeC": "Grade C"
+  },
+  "cart": {
+    "title": "Panier d'Achat",
+    "empty": "Votre panier est vide",
+    "continueShopping": "Continuer les Achats",
+    "checkout": "Passer à la Caisse",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "tax": "Taxe",
+    "total": "Total",
+    "remove": "Retirer",
+    "quantity": "Quantité",
+    "updateCart": "Mettre à Jour le Panier",
+    "itemAdded": "Article ajouté au panier",
+    "itemRemoved": "Article retiré du panier"
+  },
+  "checkout": {
+    "title": "Paiement",
+    "shippingAddress": "Adresse de Livraison",
+    "billingAddress": "Adresse de Facturation",
+    "sameAsShipping": "Identique à l'adresse de livraison",
+    "paymentMethod": "Méthode de Paiement",
+    "deliveryMethod": "Méthode de Livraison",
+    "orderSummary": "Résumé de la Commande",
+    "placeOrder": "Passer la Commande",
+    "processing": "Traitement en cours...",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "city": "Ville",
+    "postalCode": "Code Postal",
+    "country": "Pays"
+  },
+  "orders": {
+    "title": "Mes Commandes",
+    "orderNumber": "Numéro de Commande",
+    "date": "Date",
+    "status": "Statut",
+    "total": "Total",
+    "viewOrder": "Voir la Commande",
+    "trackOrder": "Suivre la Commande",
+    "orderDetails": "Détails de la Commande",
+    "items": "Articles",
+    "shippingAddress": "Adresse de Livraison",
+    "billingAddress": "Adresse de Facturation",
+    "paymentMethod": "Méthode de Paiement",
+    "orderHistory": "Historique des Commandes",
+    "noOrders": "Aucune commande pour le moment",
+    "statuses": {
+      "pending": "En Attente",
+      "processing": "En Traitement",
+      "shipped": "Expédié",
+      "delivered": "Livré",
+      "cancelled": "Annulé"
+    }
+  },
+  "admin": {
+    "title": "Tableau de Bord Admin",
+    "login": {
+      "title": "ACCÈS ADMIN",
+      "subtitle": "Connectez-vous au centre de commande",
+      "loginMethod": "Méthode de Connexion",
+      "email": "📧 Adresse Email",
+      "phone": "📱 Numéro de Téléphone",
+      "emailPlaceholder": "admin@exemple.com",
+      "phonePlaceholder": "+221 XX XXX XX XX",
+      "password": "Mot de Passe",
+      "passwordPlaceholder": "••••••••",
+      "submit": "ENTRER AU CENTRE DE COMMANDE",
+      "authenticating": "AUTHENTIFICATION...",
+      "backToHome": "Retour à l'Accueil",
+      "secureAuth": "🔒 Authentification admin sécurisée"
+    },
+    "nav": {
+      "dashboard": "Tableau de Bord",
+      "products": "Produits",
+      "orders": "Commandes",
+      "users": "Utilisateurs",
+      "analytics": "Analytiques",
+      "inventory": "Inventaire",
+      "templates": "Modèles",
+      "validations": "Validations",
+      "whatsapp": "WhatsApp"
+    },
+    "products": {
+      "title": "Gestion des Produits",
+      "addProduct": "Ajouter un Produit",
+      "editProduct": "Modifier le Produit",
+      "deleteProduct": "Supprimer le Produit",
+      "productList": "Liste des Produits",
+      "productDetails": "Détails du Produit"
+    },
+    "whatsapp": {
+      "title": "Pipeline WhatsApp",
+      "dashboard": "Tableau de Bord",
+      "submissions": "Soumissions",
+      "errors": "Erreurs",
+      "recovery": "Récupération",
+      "health": "Santé du Système"
+    }
+  },
+  "support": {
+    "title": "Support Client",
+    "contactUs": "Nous Contacter",
+    "faq": "FAQ",
+    "helpCenter": "Centre d'Aide",
+    "whatsapp": "Support WhatsApp",
+    "email": "Support Email",
+    "phone": "Support Téléphonique",
+    "hours": "Heures de Support",
+    "available247": "Disponible 24/7"
+  },
+  "errors": {
+    "notFound": "Page non trouvée",
+    "serverError": "Erreur serveur",
+    "unauthorized": "Non autorisé",
+    "forbidden": "Interdit",
+    "badRequest": "Mauvaise requête",
+    "tryAgain": "Veuillez réessayer",
+    "goHome": "Aller à l'Accueil"
+  }
+}

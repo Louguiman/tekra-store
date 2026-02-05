@@ -324,13 +324,25 @@ export class HealthMonitoringService {
   private checkConfiguration(): HealthCheck {
     const startTime = Date.now();
     const issues: string[] = [];
+    const warnings: string[] = [];
 
-    if (!process.env.WHATSAPP_WEBHOOK_SECRET) {
-      issues.push('WHATSAPP_WEBHOOK_SECRET not configured');
-    }
+    // Check if WhatsApp integration is enabled
+    const whatsappEnabled = process.env.WHATSAPP_ENABLED === 'true';
 
-    if (!process.env.WHATSAPP_API_TOKEN) {
-      issues.push('WHATSAPP_API_TOKEN not configured');
+    if (whatsappEnabled) {
+      // Only fail if WhatsApp is explicitly enabled but not configured
+      if (!process.env.WHATSAPP_WEBHOOK_SECRET) {
+        issues.push('WHATSAPP_WEBHOOK_SECRET not configured');
+      }
+
+      if (!process.env.WHATSAPP_API_TOKEN && !process.env.WHATSAPP_ACCESS_TOKEN) {
+        issues.push('WHATSAPP_API_TOKEN or WHATSAPP_ACCESS_TOKEN not configured');
+      }
+    } else {
+      // Just warn if WhatsApp is not enabled
+      if (!process.env.WHATSAPP_WEBHOOK_SECRET || !process.env.WHATSAPP_API_TOKEN) {
+        warnings.push('WhatsApp integration not configured (set WHATSAPP_ENABLED=true to enable)');
+      }
     }
 
     if (issues.length > 0) {
@@ -340,6 +352,16 @@ export class HealthMonitoringService {
         message: `Configuration issues: ${issues.join(', ')}`,
         responseTime: Date.now() - startTime,
         metadata: { issues },
+      };
+    }
+
+    if (warnings.length > 0) {
+      return {
+        name: 'configuration',
+        status: 'warn',
+        message: `Configuration warnings: ${warnings.join(', ')}`,
+        responseTime: Date.now() - startTime,
+        metadata: { warnings },
       };
     }
 
