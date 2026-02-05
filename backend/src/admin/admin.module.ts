@@ -21,6 +21,7 @@ import { ProductSegmentEntity } from '../entities/product-segment.entity';
 import { InventoryModule } from '../inventory/inventory.module';
 import { OrdersModule } from '../orders/orders.module';
 import { AuditModule } from '../audit/audit.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AuditModule } from '../audit/audit.module';
     InventoryModule,
     OrdersModule,
     AuditModule,
+    NotificationsModule,
   ],
   controllers: [AdminController, ValidationController],
   providers: [

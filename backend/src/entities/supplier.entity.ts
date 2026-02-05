@@ -40,6 +40,12 @@ export class Supplier {
   @Column({ name: 'preferred_categories', type: 'text', array: true, default: [] })
   preferredCategories: string[];
 
+  @Column({ length: 255, nullable: true })
+  email: string;
+
+  @Column({ name: 'contact_person', length: 255, nullable: true })
+  contactPerson: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

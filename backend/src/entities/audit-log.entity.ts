@@ -22,6 +22,7 @@ export enum AuditAction {
   USER_MANAGEMENT = 'user_management',
   SYSTEM_CONFIG = 'system_config',
   SUPPLIER_REGISTRATION = 'supplier_registration',
+  SUPPLIER_AUTHENTICATION = 'supplier_authentication',
   SUPPLIER_SUBMISSION = 'supplier_submission',
   AI_PROCESSING = 'ai_processing',
   HUMAN_VALIDATION = 'human_validation',

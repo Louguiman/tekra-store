@@ -8,6 +8,8 @@ import {
   Delete,
   Query,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { SuppliersService, CreateSupplierDto, UpdateSupplierDto } from './suppliers.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -45,6 +47,97 @@ export class SuppliersController {
   @Roles(UserRole.ADMIN, UserRole.STAFF)
   findOne(@Param('id') id: string) {
     return this.suppliersService.findOne(id);
+  }
+
+  @Get(':id/activity')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  getActivity(
+    @Param('id') id: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.suppliersService.getSupplierActivity(id, limit);
+  }
+
+  @Get(':id/performance')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  getPerformanceReport(@Param('id') id: string) {
+    return this.suppliersService.getPerformanceReport(id);
+  }
+
+  @Post(':id/recalculate-metrics')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  recalculateMetrics(@Param('id') id: string) {
+    return this.suppliersService.recalculateMetrics(id);
+  }
+
+  @Post(':id/deactivate')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  deactivate(
+    @Param('id') id: string,
+    @Body('reason') reason?: string,
+  ) {
+    return this.suppliersService.deactivateSupplier(id, reason);
+  }
+
+  @Post(':id/reactivate')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  reactivate(@Param('id') id: string) {
+    return this.suppliersService.reactivateSupplier(id);
+  }
+
+  @Get(':id/privileges')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  getPrivileges(@Param('id') id: string) {
+    return this.suppliersService.findOne(id).then(supplier => 
+      this.suppliersService.getSupplierPrivileges(supplier)
+    );
+  }
+
+  @Get(':id/expedited-processing')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  checkExpeditedProcessing(@Param('id') id: string) {
+    return this.suppliersService.qualifiesForExpeditedProcessing(id);
+  }
+
+  @Get(':id/auto-approval')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  checkAutoApproval(
+    @Param('id') id: string,
+    @Query('confidenceScore') confidenceScore: number,
+  ) {
+    return this.suppliersService.qualifiesForAutoApproval(id, confidenceScore);
+  }
+
+  @Get(':id/priority')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  getPriority(@Param('id') id: string) {
+    return this.suppliersService.getSupplierPriority(id);
+  }
+
+  @Get(':id/submission-limit')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  checkSubmissionLimit(@Param('id') id: string) {
+    return this.suppliersService.checkDailySubmissionLimit(id);
+  }
+
+  @Post(':id/upgrade-tier')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  upgradeTier(
+    @Param('id') id: string,
+    @Body('tier') tier: 'gold' | 'silver' | 'bronze',
+    @Body('reason') reason: string,
+  ) {
+    return this.suppliersService.upgradeSupplierTier(id, tier, reason);
+  }
+
+  @Get('by-tier/:tier')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  getByTier(@Param('tier') tier: 'gold' | 'silver' | 'bronze' | 'new') {
+    return this.suppliersService.getSuppliersByTier(tier);
   }
 
   @Patch(':id')

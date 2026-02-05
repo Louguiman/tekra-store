@@ -516,6 +516,15 @@ export const {
   // Admin Supplier Management
   useGetSuppliersQuery,
   useGetSupplierProductsQuery,
+  // Admin Validation Management
+  useGetPendingValidationsQuery,
+  useGetValidationByIdQuery,
+  useGetValidationStatsQuery,
+  useGetFeedbackCategoriesQuery,
+  useApproveValidationMutation,
+  useRejectValidationMutation,
+  useBulkApproveValidationsMutation,
+  useBulkRejectValidationsMutation,
 } = api
 
 // Types

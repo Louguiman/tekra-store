@@ -46,7 +46,7 @@ export default function ValidationReview({ validation, onApprove, onReject }: Va
   }
 
   const handleFieldEdit = (field: string, value: any) => {
-    setEdits(prev => ({
+    setEdits((prev: Record<string, any>) => ({
       ...prev,
       [field]: value
     }))
@@ -114,7 +114,7 @@ export default function ValidationReview({ validation, onApprove, onReject }: Va
           <div className="mt-6">
             <h3 className="text-sm font-medium text-gray-500 mb-2">Suggested Actions</h3>
             <div className="space-y-2">
-              {validation.suggestedActions.map((action, index) => (
+              {validation.suggestedActions.map((action: any, index: number) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                   <div>
                     <span className="text-sm font-medium text-gray-900 capitalize">
@@ -189,7 +189,7 @@ export default function ValidationReview({ validation, onApprove, onReject }: Va
             This submission contains {validation.relatedValidations.length} other product{validation.relatedValidations.length !== 1 ? 's' : ''}:
           </p>
           <div className="space-y-2">
-            {validation.relatedValidations.map((relatedId) => (
+            {validation.relatedValidations.map((relatedId: string) => (
               <div key={relatedId} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                 <span className="text-sm text-gray-700">Validation {relatedId}</span>
                 <a
