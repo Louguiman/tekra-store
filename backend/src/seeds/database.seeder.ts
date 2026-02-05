@@ -1,8 +1,10 @@
 import { DataSource } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { Country } from '../entities/country.entity';
 import { Category } from '../entities/category.entity';
 import { ProductSegmentEntity, ProductSegment } from '../entities/product-segment.entity';
 import { Role } from '../entities/role.entity';
+import { User, UserRole } from '../entities/user.entity';
 import { DeliveryMethod, DeliveryType } from '../entities/delivery-method.entity';
 import { PickupPoint } from '../entities/pickup-point.entity';
 
@@ -16,6 +18,7 @@ export class DatabaseSeeder {
     await this.seedCategories();
     await this.seedProductSegments();
     await this.seedRoles();
+    await this.seedDefaultAdminUser();
     await this.seedDeliveryMethods();
     await this.seedPickupPoints();
 
@@ -130,6 +133,72 @@ export class DatabaseSeeder {
       } else {
         console.log(`Role already exists: ${roleData.name}`);
       }
+    }
+  }
+
+  private async seedDefaultAdminUser(): Promise<void> {
+    console.log('Seeding default admin user...');
+    
+    const userRepository = this.dataSource.getRepository(User);
+    
+    // Check if admin user already exists
+    const existingAdmin = await userRepository.findOne({
+      where: { email: 'admin@ecommerce.local' },
+    });
+
+    if (!existingAdmin) {
+      // Hash the default password
+      const saltRounds = 12;
+      const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin123!';
+      const passwordHash = await bcrypt.hash(defaultPassword, saltRounds);
+
+      // Create default admin user
+      const adminUser = userRepository.create({
+        fullName: 'System Administrator',
+        email: 'admin@ecommerce.local',
+        phone: '+223 70 00 00 00',
+        passwordHash,
+        role: UserRole.ADMIN,
+        countryCode: 'ML',
+      });
+
+      await userRepository.save(adminUser);
+      console.log('Created default admin user:');
+      console.log('  Email: admin@ecommerce.local');
+      console.log('  Phone: +223 70 00 00 00');
+      console.log(`  Password: ${defaultPassword}`);
+      console.log('  ⚠️  IMPORTANT: Change the default password after first login!');
+    } else {
+      console.log('Default admin user already exists: admin@ecommerce.local');
+    }
+
+    // Also create a staff user for testing
+    const existingStaff = await userRepository.findOne({
+      where: { email: 'staff@ecommerce.local' },
+    });
+
+    if (!existingStaff) {
+      const saltRounds = 12;
+      const defaultPassword = process.env.DEFAULT_STAFF_PASSWORD || 'Staff123!';
+      const passwordHash = await bcrypt.hash(defaultPassword, saltRounds);
+
+      const staffUser = userRepository.create({
+        fullName: 'Staff Member',
+        email: 'staff@ecommerce.local',
+        phone: '+223 70 00 00 01',
+        passwordHash,
+        role: UserRole.STAFF,
+        countryCode: 'ML',
+      });
+
+      await userRepository.save(staffUser);
+      console.log('Created default staff user:');
+      console.log('  Email: staff@ecommerce.local');
+      console.log('  Phone: +223 70 00 00 01');
+      console.log(`  Password: ${defaultPassword}`);
+      console.log('  ⚠️  IMPORTANT: Change the default password after first login!');
+    } else {
+      console.log('Default staff user already exists: staff@ecommerce.local');
     }
   }
 

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The WhatsApp Supplier Inventory Automation System addresses the critical challenge of scaling inventory management for West African e-commerce platforms where suppliers lack APIs and communicate product information through WhatsApp messages, images, PDFs, and voice notes. The system provides an automated pipeline from WhatsApp ingestion through AI-assisted parsing to human-validated inventory updates.
+The WhatsApp Supplier Inventory Automation System addresses the critical challenge of scaling inventory management for West African e-commerce platforms where suppliers lack APIs and communicate product information through WhatsApp messages, images, and PDFs. The system provides an automated pipeline from WhatsApp ingestion through AI-assisted parsing to human-validated inventory updates.
 
 ## Glossary
 
@@ -29,8 +29,7 @@ The WhatsApp Supplier Inventory Automation System addresses the critical challen
 1. WHEN a supplier sends a text message to the WhatsApp Business number, THE Webhook_Handler SHALL receive and process the message within 30 seconds
 2. WHEN a supplier sends an image with product information, THE Webhook_Handler SHALL receive both the image and any accompanying text
 3. WHEN a supplier sends a PDF document, THE Webhook_Handler SHALL download and store the document for processing
-4. WHEN a supplier sends a voice note, THE Webhook_Handler SHALL receive and queue it for transcription
-5. WHEN multiple messages are sent in sequence, THE Webhook_Handler SHALL group them by supplier and timestamp for batch processing
+4. WHEN multiple messages are sent in sequence, THE Webhook_Handler SHALL group them by supplier and timestamp for batch processing
 
 ### Requirement 2: AI-Assisted Data Extraction
 
@@ -41,9 +40,8 @@ The WhatsApp Supplier Inventory Automation System addresses the critical challen
 1. WHEN processing a text message, THE AI_Parser SHALL extract product name, brand, category, condition, grade, price, quantity, and specifications
 2. WHEN processing an image, THE AI_Parser SHALL perform OCR to extract text and identify product details from visual elements
 3. WHEN processing a PDF document, THE AI_Parser SHALL extract tabular data and product listings with associated metadata
-4. WHEN processing voice notes, THE AI_Parser SHALL transcribe audio to text and then extract product information
-5. WHEN extraction is complete, THE AI_Parser SHALL assign a confidence score between 0-100 for each extracted field
-6. WHEN duplicate products are detected, THE AI_Parser SHALL flag them and suggest merge or update actions
+4. WHEN extraction is complete, THE AI_Parser SHALL assign a confidence score between 0-100 for each extracted field
+5. WHEN duplicate products are detected, THE AI_Parser SHALL flag them and suggest merge or update actions
 
 ### Requirement 3: Human Validation Workflow
 
@@ -56,6 +54,16 @@ The WhatsApp Supplier Inventory Automation System addresses the critical challen
 3. WHEN approving a suggestion, THE Human_Validator SHALL be able to edit any field before final approval
 4. WHEN rejecting a suggestion, THE Human_Validator SHALL provide feedback that improves future AI performance
 5. WHEN validation is complete, THE Human_Validator SHALL trigger the inventory update process
+
+#### Enhanced Acceptance Criteria
+
+6. WHEN accessing the validation queue, THE Human_Validator SHALL see items sorted by priority (high confidence first, then by submission date)
+7. WHEN reviewing multiple extractions from the same supplier submission, THE Human_Validator SHALL be able to bulk approve or reject related items
+8. WHEN editing extracted data, THE Human_Validator SHALL have access to category and segment dropdowns populated from existing data
+9. WHEN providing rejection feedback, THE Human_Validator SHALL select from predefined feedback categories (incorrect extraction, poor image quality, missing information, duplicate product, etc.)
+10. WHEN validation decisions are made, THE System SHALL automatically update the supplier submission status and log all changes in the audit trail
+11. WHEN high-confidence extractions (>90%) are processed, THE System SHALL offer an "auto-approve" option for trusted suppliers
+12. WHEN validation is pending for more than 24 hours, THE System SHALL send reminder notifications to available admin users
 
 ### Requirement 4: Inventory System Integration
 

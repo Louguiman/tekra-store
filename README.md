@@ -60,6 +60,18 @@ make deploy          # Using Makefile
 - **Backend API:** http://localhost:3001/api
 - **API Docs:** http://localhost:3001/api/docs
 
+### 3. Health Checks
+- **Frontend Health:** http://localhost:3000/health.json
+- **Backend Health:** http://localhost:3001/api/health
+
+### 4. Default Admin Account
+After running the seeder, you can access the admin dashboard with:
+- **Email:** `admin@ecommerce.local`
+- **Password:** `Admin123!`
+- **Staff Account:** `staff@ecommerce.local` / `Staff123!`
+
+⚠️ **IMPORTANT:** Change these default passwords immediately in production!
+
 ## Development Setup
 
 ### Prerequisites
@@ -148,6 +160,10 @@ CARD_PAYMENT_API_KEY=your-card-payment-api-key
 
 # Database (optional - uses Docker defaults)
 DB_PASSWORD=your-secure-db-password
+
+# Default Admin Credentials (optional - for seeder)
+DEFAULT_ADMIN_PASSWORD=Admin123!
+DEFAULT_STAFF_PASSWORD=Staff123!
 ```
 
 ## Project Structure

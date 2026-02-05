@@ -62,7 +62,26 @@ All TypeORM entities are properly defined with:
 - Payments (mobile money + cards)
 - Roles (RBAC system)
 
-### 5. Testing and Validation
+### 5. Default Admin Account
+The seeder now creates default admin and staff accounts for immediate system access:
+
+**Default Admin Account:**
+- Email: `admin@ecommerce.local`
+- Phone: `+223 70 00 00 00`
+- Password: `Admin123!` (configurable via `DEFAULT_ADMIN_PASSWORD` env var)
+- Role: Admin
+- Country: Mali (ML)
+
+**Default Staff Account:**
+- Email: `staff@ecommerce.local`
+- Phone: `+223 70 00 00 01`
+- Password: `Staff123!` (configurable via `DEFAULT_STAFF_PASSWORD` env var)
+- Role: Staff
+- Country: Mali (ML)
+
+⚠️ **IMPORTANT SECURITY NOTE**: Change these default passwords immediately after first login in production environments!
+
+### 6. Testing and Validation
 - **Database Setup Tests** (`database-setup.spec.ts`)
   - Entity structure validation
   - Seed data format validation
@@ -79,7 +98,7 @@ All TypeORM entities are properly defined with:
   - Method presence verification
   - All migrations valid ✅
 
-### 6. Documentation and Configuration
+### 7. Documentation and Configuration
 - **Database Setup Guide** (`DATABASE.md`)
   - Complete setup instructions
   - Migration management

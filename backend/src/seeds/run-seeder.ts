@@ -16,6 +16,15 @@ import { Order } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
 import { Payment } from '../entities/payment.entity';
 import { Role } from '../entities/role.entity';
+import { DeliveryMethod } from '../entities/delivery-method.entity';
+import { PickupPoint } from '../entities/pickup-point.entity';
+import { AuditLog } from '../entities/audit-log.entity';
+import { SecurityAlert } from '../entities/security-alert.entity';
+import { StockReservation } from '../entities/stock-reservation.entity';
+import { DeliveryTracking } from '../entities/delivery-tracking.entity';
+import { Supplier } from '../entities/supplier.entity';
+import { SupplierSubmission } from '../entities/supplier-submission.entity';
+import { ProcessingLog } from '../entities/processing-log.entity';
 
 async function runSeeder() {
   // Create DataSource
@@ -40,6 +49,15 @@ async function runSeeder() {
       OrderItem,
       Payment,
       Role,
+      DeliveryMethod,
+      PickupPoint,
+      AuditLog,
+      SecurityAlert,
+      StockReservation,
+      DeliveryTracking,
+      Supplier,
+      SupplierSubmission,
+      ProcessingLog,
     ],
     synchronize: false,
     logging: true,

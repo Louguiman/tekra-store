@@ -11,6 +11,7 @@ import { SupplierSubmission } from '../entities/supplier-submission.entity';
 import { ProcessingLog } from '../entities/processing-log.entity';
 import { SuppliersModule } from '../suppliers/suppliers.module';
 import { AuditModule } from '../audit/audit.module';
+import { AIProcessingModule } from '../ai-processing/ai-processing.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuditModule } from '../audit/audit.module';
     ConfigModule,
     SuppliersModule,
     AuditModule,
+    AIProcessingModule,
   ],
   controllers: [WhatsappController],
   providers: [

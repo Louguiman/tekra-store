@@ -49,16 +49,20 @@ The system consists of five primary components:
 
 - **Serverless Functions**: AWS Lambda or Cloudflare Workers for scalable processing
 - **Message Queue**: AWS SQS or Redis for reliable message handling
-- **AI Services**: AWS Textract for OCR, OpenAI/Claude for text processing
+- **AI Services**: 
+  - **OCR**: Tesseract.js for client-side OCR processing
+  - **Text Processing**: Ollama with Llama 3.2 1B (containerized via Docker Compose)
+  - **Alternative**: Hugging Face Transformers.js for browser-based inference
 - **Database**: PostgreSQL (existing) with new entities for supplier management
-- **File Storage**: AWS S3 for document and image storage
+- **File Storage**: Local file system or AWS S3 for document storage
 - **Integration**: NestJS controllers and services for platform integration
+- **Containerization**: Docker Compose for Ollama service orchestration
 
 ## Components and Interfaces
 
 ### WhatsApp Webhook Handler
 
-**Purpose**: Receives and processes incoming WhatsApp messages, images, PDFs, and voice notes.
+**Purpose**: Receives and processes incoming WhatsApp messages, images, and PDFs.
 
 **Key Responsibilities**:
 - Webhook signature verification for security
@@ -98,14 +102,19 @@ interface WebhookChange {
 
 ### AI Processing Engine
 
-**Purpose**: Extracts structured product information from unstructured supplier content using OCR and natural language processing.
+**Purpose**: Extracts structured product information from unstructured supplier content using open-source OCR and local LLM processing.
 
 **Key Responsibilities**:
-- OCR processing for images and PDFs
-- Text extraction and normalization
-- Product data structure mapping
+- OCR processing for images and PDFs using Tesseract.js
+- Text extraction and normalization using local LLM models
+- Product data structure mapping with rule-based fallbacks
 - Confidence scoring and duplicate detection
-- Learning from human corrections
+- Learning from human corrections through fine-tuning
+
+**Technology Choices**:
+- **OCR**: Tesseract.js (client-side, no API costs)
+- **LLM**: Ollama with Llama 3.2 1B/3B (containerized via Docker Compose)
+- **Fallback**: Rule-based extraction for common patterns
 
 **Interface**:
 ```typescript
@@ -113,9 +122,13 @@ interface AIProcessingEngine {
   processTextMessage(content: string, supplier: Supplier): Promise<ExtractedProduct[]>;
   processImage(imageUrl: string, supplier: Supplier): Promise<ExtractedProduct[]>;
   processPDF(pdfUrl: string, supplier: Supplier): Promise<ExtractedProduct[]>;
-  processVoiceNote(audioUrl: string, supplier: Supplier): Promise<ExtractedProduct[]>;
   calculateConfidenceScore(extraction: ExtractedProduct): number;
   detectDuplicates(product: ExtractedProduct): Promise<DuplicateMatch[]>;
+  
+  // New methods for local processing
+  initializeLocalModel(): Promise<void>;
+  extractWithRules(text: string): ExtractedProduct[];
+  enhanceWithLLM(ruleBasedExtraction: ExtractedProduct[], originalText: string): Promise<ExtractedProduct[]>;
 }
 
 interface ExtractedProduct {
@@ -130,10 +143,12 @@ interface ExtractedProduct {
   specifications?: Record<string, string>;
   confidenceScore: number;
   extractionMetadata: {
-    sourceType: 'text' | 'image' | 'pdf' | 'voice';
+    sourceType: 'text' | 'image' | 'pdf';
     processingTime: number;
-    aiModel: string;
+    aiModel: string; // 'llama-3.2-1b', 'phi-3-mini', 'rule-based'
     extractedFields: string[];
+    fallbackUsed: boolean;
+  };
   };
 }
 ```
@@ -143,24 +158,61 @@ interface ExtractedProduct {
 **Purpose**: Provides admin interface for reviewing, editing, and approving AI-generated product suggestions.
 
 **Key Responsibilities**:
-- Queue management for pending validations
+- Queue management for pending validations with priority sorting
 - Side-by-side comparison of original content and extracted data
-- Bulk approval and editing capabilities
-- Feedback collection for AI improvement
-- Integration with existing admin authentication
+- Bulk approval and editing capabilities for related submissions
+- Feedback collection for AI improvement with categorized feedback types
+- Integration with existing admin authentication and audit logging
+- Automated notifications and reminder system for pending validations
 
 **Interface**:
 ```typescript
 interface HumanValidationService {
-  getPendingValidations(adminId: string): Promise<ValidationItem[]>;
-  approveProduct(validationId: string, edits?: Partial<ExtractedProduct>): Promise<void>;
-  rejectProduct(validationId: string, feedback: string): Promise<void>;
-  bulkApprove(validationIds: string[], edits?: Record<string, Partial<ExtractedProduct>>): Promise<void>;
+  // Queue Management
+  getPendingValidations(adminId: string, filters?: ValidationFilters): Promise<PaginatedValidationItems>;
+  getValidationById(validationId: string): Promise<ValidationItem>;
+  getValidationsBySubmission(submissionId: string): Promise<ValidationItem[]>;
+  
+  // Validation Actions
+  approveProduct(validationId: string, edits?: Partial<ExtractedProduct>, adminId?: string): Promise<void>;
+  rejectProduct(validationId: string, feedback: ValidationFeedback, adminId?: string): Promise<void>;
+  bulkApprove(validationIds: string[], edits?: Record<string, Partial<ExtractedProduct>>, adminId?: string): Promise<BulkValidationResult>;
+  bulkReject(validationIds: string[], feedback: ValidationFeedback, adminId?: string): Promise<BulkValidationResult>;
+  
+  // Feedback and Learning
   provideFeedback(validationId: string, feedback: ValidationFeedback): Promise<void>;
+  getFeedbackCategories(): Promise<FeedbackCategory[]>;
+  
+  // Notifications and Reminders
+  sendValidationNotifications(adminIds: string[]): Promise<void>;
+  getPendingReminders(): Promise<ValidationReminder[]>;
+  
+  // Auto-approval for trusted suppliers
+  enableAutoApproval(supplierId: string, confidenceThreshold: number): Promise<void>;
+  processAutoApprovals(): Promise<AutoApprovalResult[]>;
+}
+
+interface ValidationFilters {
+  supplierId?: string;
+  contentType?: 'text' | 'image' | 'pdf' | 'voice';
+  confidenceRange?: [number, number];
+  priority?: 'low' | 'medium' | 'high';
+  dateRange?: [Date, Date];
+  category?: string;
+}
+
+interface PaginatedValidationItems {
+  items: ValidationItem[];
+  total: number;
+  page: number;
+  limit: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
 interface ValidationItem {
   id: string;
+  submissionId: string;
   supplierId: string;
   supplierName: string;
   originalContent: {
@@ -170,8 +222,11 @@ interface ValidationItem {
   };
   extractedProduct: ExtractedProduct;
   suggestedActions: ValidationAction[];
-  createdAt: Date;
   priority: 'low' | 'medium' | 'high';
+  confidenceScore: number;
+  createdAt: Date;
+  estimatedProcessingTime: number; // in minutes
+  relatedValidations?: string[]; // IDs of related validations from same submission
 }
 
 interface ValidationAction {
@@ -179,7 +234,355 @@ interface ValidationAction {
   targetProductId?: string;
   confidence: number;
   reasoning: string;
+  suggestedEdits?: Partial<ExtractedProduct>;
 }
+
+interface ValidationFeedback {
+  category: FeedbackCategory;
+  subcategory?: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+  suggestedImprovement?: string;
+}
+
+interface FeedbackCategory {
+  id: string;
+  name: string;
+  description: string;
+  subcategories: string[];
+}
+
+interface BulkValidationResult {
+  successful: string[];
+  failed: Array<{ id: string; error: string }>;
+  totalProcessed: number;
+}
+
+interface ValidationReminder {
+  validationId: string;
+  submissionId: string;
+  supplierId: string;
+  pendingSince: Date;
+  priority: 'low' | 'medium' | 'high';
+  remindersSent: number;
+}
+
+interface AutoApprovalResult {
+  validationId: string;
+  submissionId: string;
+  supplierId: string;
+  confidenceScore: number;
+  approved: boolean;
+  reason?: string;
+}
+```
+
+**Admin Dashboard Integration**:
+The validation service integrates with the existing admin dashboard structure:
+
+- **Route**: `/admin/validations` - Main validation queue page
+- **Route**: `/admin/validations/[id]` - Individual validation review page  
+- **Route**: `/admin/validations/bulk` - Bulk validation management page
+- **Component**: `ValidationQueue` - Lists pending validations with filters
+- **Component**: `ValidationReview` - Side-by-side review interface
+- **Component**: `BulkValidationActions` - Bulk approve/reject interface
+- **API Integration**: Extends existing admin API with validation endpoints
+
+**New API Endpoints**:
+```typescript
+// Admin Validation Controller
+@Controller('admin/validations')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.STAFF)
+export class AdminValidationController {
+  
+  // GET /admin/validations - Get pending validations with filters
+  @Get()
+  async getPendingValidations(@Query() filters: ValidationFiltersDto): Promise<PaginatedValidationItemsDto>;
+  
+  // GET /admin/validations/:id - Get specific validation item
+  @Get(':id')
+  async getValidationById(@Param('id') id: string): Promise<ValidationItemDto>;
+  
+  // POST /admin/validations/:id/approve - Approve validation with optional edits
+  @Post(':id/approve')
+  async approveValidation(
+    @Param('id') id: string, 
+    @Body() approvalDto: ApprovalDto,
+    @CurrentUser() admin: User
+  ): Promise<void>;
+  
+  // POST /admin/validations/:id/reject - Reject validation with feedback
+  @Post(':id/reject')
+  async rejectValidation(
+    @Param('id') id: string,
+    @Body() rejectionDto: RejectionDto,
+    @CurrentUser() admin: User
+  ): Promise<void>;
+  
+  // POST /admin/validations/bulk/approve - Bulk approve validations
+  @Post('bulk/approve')
+  async bulkApprove(
+    @Body() bulkApprovalDto: BulkApprovalDto,
+    @CurrentUser() admin: User
+  ): Promise<BulkValidationResultDto>;
+  
+  // POST /admin/validations/bulk/reject - Bulk reject validations
+  @Post('bulk/reject')
+  async bulkReject(
+    @Body() bulkRejectionDto: BulkRejectionDto,
+    @CurrentUser() admin: User
+  ): Promise<BulkValidationResultDto>;
+  
+  // GET /admin/validations/feedback/categories - Get feedback categories
+  @Get('feedback/categories')
+  async getFeedbackCategories(): Promise<FeedbackCategoryDto[]>;
+  
+  // GET /admin/validations/stats - Get validation queue statistics
+  @Get('stats')
+  async getValidationStats(): Promise<ValidationStatsDto>;
+}
+```
+
+**Required DTOs**:
+```typescript
+// Validation Filters DTO
+export class ValidationFiltersDto {
+  @IsOptional()
+  @IsUUID()
+  supplierId?: string;
+
+  @IsOptional()
+  @IsIn(['text', 'image', 'pdf', 'voice'])
+  contentType?: string;
+
+  @IsOptional()
+  @IsIn(['low', 'medium', 'high'])
+  priority?: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  minConfidence?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  maxConfidence?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number = 20;
+}
+
+// Approval DTO
+export class ApprovalDto {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ExtractedProductEditDto)
+  edits?: ExtractedProductEditDto;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  notes?: string;
+}
+
+// Rejection DTO
+export class RejectionDto {
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => ValidationFeedbackDto)
+  feedback: ValidationFeedbackDto;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  notes?: string;
+}
+
+// Validation Feedback DTO
+export class ValidationFeedbackDto {
+  @IsNotEmpty()
+  @IsString()
+  category: string;
+
+  @IsOptional()
+  @IsString()
+  subcategory?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(1000)
+  description: string;
+
+  @IsIn(['low', 'medium', 'high'])
+  severity: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  suggestedImprovement?: string;
+}
+
+// Extracted Product Edit DTO
+export class ExtractedProductEditDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  brand?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  category?: string;
+
+  @IsOptional()
+  @IsIn(['new', 'used', 'refurbished'])
+  condition?: string;
+
+  @IsOptional()
+  @IsIn(['A', 'B', 'C', 'D'])
+  grade?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  price?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  currency?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  quantity?: number;
+
+  @IsOptional()
+  @IsObject()
+  specifications?: Record<string, string>;
+}
+
+// Bulk Operations DTOs
+export class BulkApprovalDto {
+  @IsArray()
+  @IsUUID(4, { each: true })
+  validationIds: string[];
+
+  @IsOptional()
+  @IsObject()
+  globalEdits?: Record<string, ExtractedProductEditDto>;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  notes?: string;
+}
+
+export class BulkRejectionDto {
+  @IsArray()
+  @IsUUID(4, { each: true })
+  validationIds: string[];
+
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => ValidationFeedbackDto)
+  feedback: ValidationFeedbackDto;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  notes?: string;
+}
+```
+
+**Frontend Component Specifications**:
+```typescript
+// Main Validation Queue Component
+interface ValidationQueueProps {
+  filters: ValidationFilters;
+  onFiltersChange: (filters: ValidationFilters) => void;
+  onValidationSelect: (validationId: string) => void;
+  onBulkAction: (action: 'approve' | 'reject', ids: string[]) => void;
+}
+
+// Individual Validation Review Component
+interface ValidationReviewProps {
+  validationId: string;
+  onApprove: (edits?: ExtractedProductEditDto, notes?: string) => void;
+  onReject: (feedback: ValidationFeedbackDto, notes?: string) => void;
+  onEdit: (field: string, value: any) => void;
+  showRelatedValidations?: boolean;
+}
+
+// Side-by-side Content Display Component
+interface ContentComparisonProps {
+  originalContent: {
+    type: 'text' | 'image' | 'pdf' | 'voice';
+    content: string;
+    mediaUrl?: string;
+  };
+  extractedData: ExtractedProduct;
+  confidenceScores: Record<string, number>;
+  onFieldEdit: (field: string, value: any) => void;
+  editable?: boolean;
+}
+
+// Feedback Collection Component
+interface FeedbackFormProps {
+  categories: FeedbackCategory[];
+  onSubmit: (feedback: ValidationFeedbackDto) => void;
+  onCancel: () => void;
+  initialFeedback?: Partial<ValidationFeedbackDto>;
+}
+
+// Bulk Actions Component
+interface BulkActionsProps {
+  selectedIds: string[];
+  onBulkApprove: (globalEdits?: Record<string, ExtractedProductEditDto>) => void;
+  onBulkReject: (feedback: ValidationFeedbackDto) => void;
+  onClearSelection: () => void;
+  disabled?: boolean;
+}
+
+// Validation Statistics Component
+interface ValidationStatsProps {
+  stats: {
+    totalPending: number;
+    highPriority: number;
+    avgProcessingTime: number;
+    approvalRate: number;
+    commonRejectionReasons: Array<{ reason: string; count: number }>;
+  };
+  refreshInterval?: number;
+}
+```
 ```
 
 ### Inventory Integration Service
@@ -481,6 +884,18 @@ Based on the prework analysis and property reflection, the following properties 
 ### Property 5: Validation Workflow Completeness
 *For any* completed AI extraction, the human validation service should provide all necessary information (original content, extracted data, confidence scores) and support all validation actions (approve, reject, edit).
 **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
+
+### Property 5a: Enhanced Validation Queue Management
+*For any* validation queue request with filters, the system should return properly sorted and paginated results, with priority ordering (high confidence first, then by submission date) and accurate filtering by supplier, content type, confidence range, and date range.
+**Validates: Requirements 3.6, 3.7**
+
+### Property 5b: Bulk Validation Operations
+*For any* bulk validation operation (approve or reject), the system should process all valid items, handle partial failures gracefully, provide detailed results for each item, and maintain audit trails for all decisions.
+**Validates: Requirements 3.8, 3.10**
+
+### Property 5c: Validation Feedback and Learning
+*For any* validation feedback provided, the system should categorize it correctly, store it for future AI improvement, and provide analytics on common rejection patterns to help improve extraction accuracy.
+**Validates: Requirements 3.9, 3.4**
 
 ### Property 6: Inventory Integration Consistency
 *For any* approved product validation, the inventory system should create or update the appropriate entities (Product, InventoryItem, ProductPrice) with correct categorization and grading based on the extracted data.

@@ -25,7 +25,7 @@ This implementation plan converts the WhatsApp Supplier Inventory Automation Sys
     - **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 5.3**
   
   - [x] 2.3 Implement media file download and storage
-    - Add S3 or local file storage for images, PDFs, and voice notes
+    - Add S3 or local file storage for images and PDFs
     - Implement secure file download from WhatsApp API
     - Add file type validation and security scanning
     - _Requirements: 1.2, 1.3, 1.4, 8.2, 8.3_
@@ -40,58 +40,69 @@ This implementation plan converts the WhatsApp Supplier Inventory Automation Sys
     - **Property 2: Message Grouping Consistency**
     - **Validates: Requirements 1.5**
 
-- [ ] 3. Checkpoint - Ensure webhook processing works
+- [-] 3. Checkpoint - Ensure webhook processing works
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Implement AI processing engine
-  - [ ] 4.1 Set up OCR and text extraction services
-    - Integrate AWS Textract for PDF and image OCR
-    - Set up OpenAI/Claude API for text processing
-    - Implement voice note transcription service
-    - _Requirements: 2.2, 2.3, 2.4_
+- [x] 4. Implement AI processing engine
+  - [x] 4.1 Set up OCR and text extraction services
+    - Add Ollama service to docker-compose.yml (see docker-compose.ollama.yml for reference)
+    - Configure Ollama to automatically pull Llama 3.2 1B model on startup
+    - Set up Tesseract.js for client-side OCR processing
+    - Create PDF text extraction using pdf-parse library
+    - Configure environment variables for Ollama API endpoint (OLLAMA_BASE_URL)
+    - Add health checks and proper service dependencies
+    - _Requirements: 2.2, 2.3_
   
-  - [ ] 4.2 Create product data extraction logic
-    - Implement structured data extraction from unstructured content
-    - Add confidence scoring for extracted fields
-    - Create product categorization and mapping logic
+  - [x] 4.2 Create product data extraction logic
+    - Implement rule-based extraction patterns for common product formats
+    - Create LLM prompt templates for structured data extraction
+    - Add confidence scoring based on extraction method and field completeness
+    - Create product categorization using existing category mappings
     - _Requirements: 2.1, 2.5_
   
-  - [ ]* 4.3 Write property test for AI extraction coverage
+  - [x]* 4.3 Write property test for AI extraction coverage
     - **Property 3: AI Extraction Field Coverage**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5**
   
-  - [ ] 4.4 Implement duplicate detection system
+  - [x] 4.4 Implement duplicate detection system
     - Create product similarity matching algorithm
     - Add duplicate flagging and merge suggestion logic
     - Integrate with existing product database for comparison
     - _Requirements: 2.6_
   
-  - [ ]* 4.5 Write property test for duplicate detection
+  - [x]* 4.5 Write property test for duplicate detection
     - **Property 4: Duplicate Detection Accuracy**
     - **Validates: Requirements 2.6**
 
 - [ ] 5. Implement human validation service
   - [ ] 5.1 Create validation queue and admin interface
-    - Build admin dashboard for pending validations
-    - Implement validation item display with original content
-    - Add approval, rejection, and editing capabilities
-    - _Requirements: 3.1, 3.2, 3.3_
+    - Build admin dashboard page at `/admin/validations` with queue listing
+    - Implement validation item display with original content side-by-side with extracted data
+    - Add filtering and sorting capabilities (by confidence, date, supplier, content type)
+    - Create individual validation review page at `/admin/validations/[id]`
+    - Add approval, rejection, and editing capabilities with form validation
+    - Integrate with existing admin authentication and role-based access control
+    - _Requirements: 3.1, 3.2, 3.3, 3.6, 3.7_
   
   - [ ] 5.2 Add feedback collection and AI improvement
-    - Implement feedback capture for rejected items
-    - Create learning mechanism for AI improvement
-    - Add bulk approval and editing features
-    - _Requirements: 3.4_
+    - Implement structured feedback capture for rejected items with predefined categories
+    - Create feedback categorization system (incorrect extraction, poor quality, missing info, etc.)
+    - Add bulk approval and editing features for related submissions
+    - Build feedback analytics dashboard for tracking common rejection reasons
+    - Create learning mechanism integration points for future AI improvement
+    - _Requirements: 3.4, 3.8, 3.9_
   
   - [ ]* 5.3 Write property test for validation workflow
     - **Property 5: Validation Workflow Completeness**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
   
-  - [ ] 5.4 Implement validation completion triggers
-    - Add inventory update triggers on approval
-    - Implement notification system for stakeholders
-    - Create workflow state management
-    - _Requirements: 3.5_
+  - [ ] 5.4 Implement validation completion triggers and notifications
+    - Add inventory update triggers on approval with proper error handling
+    - Implement notification system for stakeholders (email/SMS alerts)
+    - Create workflow state management with audit logging
+    - Add reminder notifications for pending validations (24-hour threshold)
+    - Implement auto-approval system for high-confidence extractions from trusted suppliers
+    - _Requirements: 3.5, 3.10, 3.11, 3.12_
 
 - [ ] 6. Checkpoint - Ensure validation system works
   - Ensure all tests pass, ask the user if questions arise.

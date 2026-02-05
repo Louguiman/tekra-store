@@ -7,6 +7,7 @@ import { SuppliersService } from '../suppliers/suppliers.service';
 import { AuditService } from '../audit/audit.service';
 import { MediaStorageService, MediaFile } from './media-storage.service';
 import { MessageGroupingService } from './message-grouping.service';
+import { AIProcessingService } from '../ai-processing/ai-processing.service';
 import { AuditAction, AuditResource } from '../entities/audit-log.entity';
 import * as crypto from 'crypto';
 
@@ -67,6 +68,7 @@ export class WhatsappService {
     private auditService: AuditService,
     private mediaStorageService: MediaStorageService,
     private messageGroupingService: MessageGroupingService,
+    private aiProcessingService: AIProcessingService,
   ) {}
 
   validateWebhookSignature(signature: string, payload: string): boolean {
@@ -430,5 +432,125 @@ export class WhatsappService {
 
   async getSubmissionStats(supplierId?: string) {
     return this.messageGroupingService.getSubmissionStats(supplierId);
+  }
+
+  async processSubmissionWithAI(submissionId: string): Promise<void> {
+    const submission = await this.submissionRepository.findOne({
+      where: { id: submissionId },
+      relations: ['supplier'],
+    });
+
+    if (!submission) {
+      throw new Error(`Submission ${submissionId} not found`);
+    }
+
+    if (submission.processingStatus !== 'pending') {
+      throw new Error(`Submission ${submissionId} is not in pending status`);
+    }
+
+    const startTime = Date.now();
+
+    try {
+      // Update status to processing
+      submission.processingStatus = 'processing';
+      await this.submissionRepository.save(submission);
+
+      // Log AI processing start
+      await this.logProcessingStage(submissionId, 'ai_extraction', 'started', 0);
+
+      let extractedProducts = [];
+
+      // Process based on content type
+      switch (submission.contentType) {
+        case 'text':
+          extractedProducts = await this.aiProcessingService.processTextMessage(
+            submission.originalContent,
+            submission.supplier
+          );
+          break;
+        case 'image':
+          if (submission.mediaUrl) {
+            extractedProducts = await this.aiProcessingService.processImage(
+              submission.mediaUrl,
+              submission.supplier
+            );
+          }
+          break;
+        case 'pdf':
+          if (submission.mediaUrl) {
+            extractedProducts = await this.aiProcessingService.processPDF(
+              submission.mediaUrl,
+              submission.supplier
+            );
+          }
+          break;
+        default:
+          throw new Error(`Unsupported content type: ${submission.contentType}`);
+      }
+
+      // Store extracted data
+      submission.extractedData = extractedProducts;
+      submission.processingStatus = 'completed';
+      await this.submissionRepository.save(submission);
+
+      const processingTime = Date.now() - startTime;
+
+      // Log successful AI processing
+      await this.logProcessingStage(submissionId, 'ai_extraction', 'completed', processingTime, null, {
+        extractedProductsCount: extractedProducts.length,
+        averageConfidence: extractedProducts.length > 0 
+          ? extractedProducts.reduce((sum, p) => sum + p.confidenceScore, 0) / extractedProducts.length 
+          : 0,
+      });
+
+      // Log audit trail
+      await this.auditService.logAction({
+        action: AuditAction.SUPPLIER_SUBMISSION,
+        resource: AuditResource.SUPPLIER_SUBMISSION,
+        resourceId: submissionId,
+        description: `AI processing completed for submission from ${submission.supplier.name}`,
+        metadata: {
+          supplierId: submission.supplier.id,
+          contentType: submission.contentType,
+          extractedProductsCount: extractedProducts.length,
+          processingTime,
+        },
+      });
+
+    } catch (error) {
+      // Update status to failed
+      submission.processingStatus = 'failed';
+      await this.submissionRepository.save(submission);
+
+      const processingTime = Date.now() - startTime;
+
+      // Log failed AI processing
+      await this.logProcessingStage(submissionId, 'ai_extraction', 'failed', processingTime, error.message);
+
+      // Log audit trail
+      await this.auditService.logAction({
+        action: AuditAction.SUPPLIER_SUBMISSION,
+        resource: AuditResource.SUPPLIER_SUBMISSION,
+        resourceId: submissionId,
+        description: `AI processing failed for submission: ${error.message}`,
+        metadata: {
+          supplierId: submission.supplier.id,
+          contentType: submission.contentType,
+          error: error.message,
+          processingTime,
+        },
+      });
+
+      throw error;
+    }
+  }
+
+  async initializeAIProcessing(): Promise<void> {
+    try {
+      await this.aiProcessingService.initializeLocalModel();
+    } catch (error) {
+      console.error('Failed to initialize AI processing:', error.message);
+      // Don't throw error as the service can still work with rule-based extraction
+    }
   }
 }

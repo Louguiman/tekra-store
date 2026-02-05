@@ -1,6 +1,6 @@
 # West Africa E-commerce Platform - Makefile
 
-.PHONY: help build start stop restart logs status clean deploy deploy-prod dev test backup restore
+.PHONY: help build start stop restart logs status health clean deploy deploy-prod dev test backup restore
 
 # Default target
 help:
@@ -21,6 +21,7 @@ help:
 	@echo "Monitoring:"
 	@echo "  logs         - View all service logs"
 	@echo "  status       - Show service status"
+	@echo "  health       - Check service health"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  backup       - Backup database and files"
@@ -94,6 +95,18 @@ status:
 	@echo "  Backend API: http://localhost:3001/api"
 	@echo "  Admin Dashboard: http://localhost:3000/admin"
 	@echo "  API Documentation: http://localhost:3001/api/docs"
+	@echo ""
+	@echo "Health Checks:"
+	@echo "  Frontend: http://localhost:3000/health.json"
+	@echo "  Backend: http://localhost:3001/api/health"
+
+health:
+	@echo "Checking service health..."
+	@echo "Frontend Health:"
+	@curl -s http://localhost:3000/health.json | jq . || echo "Frontend not responding"
+	@echo ""
+	@echo "Backend Health:"
+	@curl -s http://localhost:3001/api/health | jq . || echo "Backend not responding"
 
 # Maintenance
 backup:
