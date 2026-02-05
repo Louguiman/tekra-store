@@ -1,4 +1,5 @@
-import { IsOptional, IsString, MaxLength, ValidateNested, Type, IsNotEmpty, IsArray, IsUUID, IsObject } from 'class-validator';
+import { IsOptional, IsString, MaxLength, ValidateNested, IsNotEmpty, IsArray, IsUUID, IsObject } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ValidationFeedbackDto } from './validation-feedback.dto';
 import { ExtractedProductEditDto } from './extracted-product-edit.dto';
 

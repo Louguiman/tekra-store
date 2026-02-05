@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsIn, IsNumber, IsInt, IsObject, MaxLength, Min, Type } from 'class-validator';
+import { IsOptional, IsString, IsIn, IsNumber, IsInt, IsObject, MaxLength, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class ExtractedProductEditDto {
   @IsOptional()

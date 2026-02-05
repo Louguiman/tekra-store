@@ -1,4 +1,5 @@
-import { IsOptional, IsUUID, IsIn, IsString, IsNumber, Min, Max, IsInt, Type } from 'class-validator';
+import { IsOptional, IsUUID, IsIn, IsString, IsNumber, Min, Max, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class ValidationFiltersDto {
   @IsOptional()

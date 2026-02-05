@@ -5,7 +5,8 @@ import { Product } from '../entities/product.entity';
 import { InventoryItem } from '../entities/inventory-item.entity';
 import { ProductPrice } from '../entities/product-price.entity';
 import { Category } from '../entities/category.entity';
-import { ProductSegmentEntity } from '../entities/product-segment.entity';
+import { ProductSegmentEntity, ProductSegment } from '../entities/product-segment.entity';
+import { Country } from '../entities/country.entity';
 import { ExtractedProduct } from '../entities/supplier-submission.entity';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction, AuditResource, AuditSeverity } from '../entities/audit-log.entity';
@@ -32,6 +33,8 @@ export class InventoryIntegrationService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(ProductSegmentEntity)
     private readonly segmentRepository: Repository<ProductSegmentEntity>,
+    @InjectRepository(Country)
+    private readonly countryRepository: Repository<Country>,
     private readonly auditService: AuditService,
   ) {}
 
@@ -54,17 +57,19 @@ export class InventoryIntegrationService {
 
       // Determine product segment based on condition
       let segment: ProductSegmentEntity | null = null;
-      if (validatedProduct.condition === 'refurbished') {
+      const isRefurbished = validatedProduct.condition === 'refurbished';
+      
+      if (isRefurbished) {
         segment = await this.segmentRepository.findOne({
-          where: { name: 'REFURBISHED' },
+          where: { name: ProductSegment.REFURBISHED },
         });
       } else if (validatedProduct.condition === 'new') {
         segment = await this.segmentRepository.findOne({
-          where: { name: 'PREMIUM' },
+          where: { name: ProductSegment.PREMIUM },
         });
       } else {
         segment = await this.segmentRepository.findOne({
-          where: { name: 'MID_RANGE' },
+          where: { name: ProductSegment.MID_RANGE },
         });
       }
 
@@ -74,11 +79,10 @@ export class InventoryIntegrationService {
         slug,
         description: this.generateDescription(validatedProduct),
         brand: validatedProduct.brand,
-        condition: validatedProduct.condition as any,
+        isRefurbished,
         refurbishedGrade: validatedProduct.grade as any,
         category,
         segment,
-        isActive: true,
       });
 
       const savedProduct = await this.productRepository.save(product);
@@ -95,15 +99,31 @@ export class InventoryIntegrationService {
         await this.inventoryRepository.save(inventoryItem);
       }
 
-      // Create price (default to FCFA for West Africa)
+      // Create price (find default country or use first available)
       if (validatedProduct.price) {
-        const price = this.priceRepository.create({
-          product: savedProduct,
-          price: validatedProduct.price,
-          currency: validatedProduct.currency || 'FCFA',
-          isActive: true,
-        });
-        await this.priceRepository.save(price);
+        // Try to find a country based on currency, default to first country
+        let country: Country | null = null;
+        
+        if (validatedProduct.currency === 'FCFA') {
+          // Find a West African country (e.g., Senegal)
+          country = await this.countryRepository.findOne({
+            where: { code: 'SN' },
+          });
+        }
+        
+        // If no country found, use the first available
+        if (!country) {
+          country = await this.countryRepository.findOne({});
+        }
+
+        if (country) {
+          const price = this.priceRepository.create({
+            product: savedProduct,
+            country,
+            price: validatedProduct.price,
+          });
+          await this.priceRepository.save(price);
+        }
       }
 
       // Log the inventory integration
@@ -168,7 +188,9 @@ export class InventoryIntegrationService {
       // Update product fields
       if (validatedProduct.name) product.name = validatedProduct.name;
       if (validatedProduct.brand) product.brand = validatedProduct.brand;
-      if (validatedProduct.condition) product.condition = validatedProduct.condition as any;
+      if (validatedProduct.condition) {
+        product.isRefurbished = validatedProduct.condition === 'refurbished';
+      }
       if (validatedProduct.grade) product.refurbishedGrade = validatedProduct.grade as any;
 
       const savedProduct = await this.productRepository.save(product);
