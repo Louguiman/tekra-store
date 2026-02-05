@@ -189,4 +189,136 @@ export class AdminController {
   async getSupplierProducts(@Param('id') supplierId: string) {
     return this.adminService.getSupplierProducts(supplierId);
   }
+
+  // WhatsApp Pipeline Management endpoints
+  @Get('whatsapp/pipeline/stats')
+  async getWhatsAppPipelineStats() {
+    return this.adminService.getWhatsAppPipelineStats();
+  }
+
+  @Get('whatsapp/submissions')
+  async getWhatsAppSubmissions(
+    @Query() query: { 
+      status?: 'pending' | 'processing' | 'completed' | 'failed';
+      validationStatus?: 'pending' | 'approved' | 'rejected';
+      supplierId?: string;
+      page?: number;
+      limit?: number;
+    }
+  ) {
+    return this.adminService.getWhatsAppSubmissions(query);
+  }
+
+  @Get('whatsapp/submissions/:id')
+  async getWhatsAppSubmissionById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.adminService.getWhatsAppSubmissionById(id);
+  }
+
+  @Post('whatsapp/submissions/:id/process')
+  @Audit({
+    action: AuditAction.SUPPLIER_SUBMISSION,
+    resource: AuditResource.SUPPLIER_SUBMISSION,
+    severity: AuditSeverity.MEDIUM,
+    description: 'Manually trigger pipeline processing',
+    resourceIdParam: 'id',
+  })
+  async triggerWhatsAppProcessing(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.adminService.triggerWhatsAppProcessing(id, user.id);
+  }
+
+  @Post('whatsapp/submissions/:id/reprocess')
+  @Roles(UserRole.ADMIN)
+  @Audit({
+    action: AuditAction.SUPPLIER_SUBMISSION,
+    resource: AuditResource.SUPPLIER_SUBMISSION,
+    severity: AuditSeverity.HIGH,
+    description: 'Reprocess failed submission',
+    resourceIdParam: 'id',
+  })
+  async reprocessWhatsAppSubmission(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.adminService.reprocessWhatsAppSubmission(id, user.id);
+  }
+
+  @Get('whatsapp/health')
+  async getWhatsAppHealth() {
+    return this.adminService.getWhatsAppHealth();
+  }
+
+  @Get('whatsapp/health/errors')
+  async getWhatsAppErrors() {
+    return this.adminService.getWhatsAppErrors();
+  }
+
+  @Patch('whatsapp/health/errors/:errorId/resolve')
+  @Roles(UserRole.ADMIN)
+  @Audit({
+    action: AuditAction.SYSTEM_CONFIG,
+    resource: AuditResource.SYSTEM,
+    severity: AuditSeverity.MEDIUM,
+    description: 'Resolve WhatsApp error',
+    resourceIdParam: 'errorId',
+  })
+  async resolveWhatsAppError(
+    @Param('errorId', ParseUUIDPipe) errorId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.adminService.resolveWhatsAppError(errorId, user.id);
+  }
+
+  @Get('whatsapp/recovery/queue')
+  async getWhatsAppRecoveryQueue() {
+    return this.adminService.getWhatsAppRecoveryQueue();
+  }
+
+  @Get('whatsapp/recovery/stats')
+  async getWhatsAppRecoveryStats() {
+    return this.adminService.getWhatsAppRecoveryStats();
+  }
+
+  @Post('whatsapp/recovery/retry/:submissionId')
+  @Audit({
+    action: AuditAction.SUPPLIER_SUBMISSION,
+    resource: AuditResource.SUPPLIER_SUBMISSION,
+    severity: AuditSeverity.MEDIUM,
+    description: 'Retry failed submission',
+    resourceIdParam: 'submissionId',
+  })
+  async retryWhatsAppSubmission(
+    @Param('submissionId', ParseUUIDPipe) submissionId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.adminService.retryWhatsAppSubmission(submissionId, user.id);
+  }
+
+  // Additional WhatsApp Dashboard endpoints
+  @Get('whatsapp/dashboard/recent-activity')
+  async getWhatsAppRecentActivity(@Query('limit') limit?: number) {
+    return this.adminService.getWhatsAppRecentActivity(limit);
+  }
+
+  @Get('whatsapp/dashboard/top-suppliers')
+  async getWhatsAppTopSuppliers(@Query('limit') limit?: number) {
+    return this.adminService.getWhatsAppTopSuppliers(limit);
+  }
+
+  @Get('whatsapp/dashboard/ai-metrics')
+  async getWhatsAppAIMetrics() {
+    return this.adminService.getWhatsAppAIMetrics();
+  }
+
+  @Get('whatsapp/dashboard/validation-trends')
+  async getWhatsAppValidationTrends(@Query('days') days?: number) {
+    return this.adminService.getWhatsAppValidationTrends(days);
+  }
+
+  @Get('whatsapp/dashboard/system-alerts')
+  async getWhatsAppSystemAlerts() {
+    return this.adminService.getWhatsAppSystemAlerts();
+  }
 }

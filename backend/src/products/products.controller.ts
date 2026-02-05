@@ -42,6 +42,30 @@ export class ProductsController {
     return this.productsService.getProducts(filters);
   }
 
+  @Get('featured')
+  @Public()
+  getFeatured(@Query('limit') limit?: number) {
+    return this.productsService.getFeaturedProducts(limit);
+  }
+
+  @Get('trending')
+  @Public()
+  getTrending(@Query('limit') limit?: number) {
+    return this.productsService.getTrendingProducts(limit);
+  }
+
+  @Get('deals')
+  @Public()
+  getDeals(@Query('limit') limit?: number) {
+    return this.productsService.getDealsProducts(limit);
+  }
+
+  @Get('new-arrivals')
+  @Public()
+  getNewArrivals(@Query('limit') limit?: number) {
+    return this.productsService.getNewArrivals(limit);
+  }
+
   @Get('search')
   @Public()
   search(@Query() filters: ProductFiltersDto) {

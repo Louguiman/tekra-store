@@ -22,6 +22,7 @@ import { InventoryModule } from '../inventory/inventory.module';
 import { OrdersModule } from '../orders/orders.module';
 import { AuditModule } from '../audit/audit.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { WhatsappModule } from '../whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     OrdersModule,
     AuditModule,
     NotificationsModule,
+    forwardRef(() => WhatsappModule),
   ],
   controllers: [AdminController, ValidationController],
   providers: [

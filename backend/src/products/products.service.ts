@@ -400,4 +400,50 @@ export class ProductsService {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
+
+  // Homepage specific methods
+
+  async getFeaturedProducts(limit: number = 8): Promise<Product[]> {
+    // Get products with high ratings or marked as featured
+    // For now, we'll get the newest products with images
+    return this.productRepository.find({
+      relations: ['category', 'segment', 'prices', 'prices.country', 'images', 'inventory'],
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
+  }
+
+  async getTrendingProducts(limit: number = 8): Promise<Product[]> {
+    // Get products that are popular (most viewed/purchased)
+    // For now, we'll get products with good inventory
+    const queryBuilder = this.createProductQueryBuilder();
+    
+    queryBuilder
+      .where('inventory.quantity > :minQuantity', { minQuantity: 0 })
+      .orderBy('product.createdAt', 'DESC')
+      .take(limit);
+
+    return queryBuilder.getMany();
+  }
+
+  async getDealsProducts(limit: number = 8): Promise<Product[]> {
+    // Get refurbished products or products with special pricing
+    return this.productRepository.find({
+      relations: ['category', 'segment', 'prices', 'prices.country', 'images', 'inventory'],
+      where: { 
+        isRefurbished: true,
+      },
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
+  }
+
+  async getNewArrivals(limit: number = 8): Promise<Product[]> {
+    // Get the newest products
+    return this.productRepository.find({
+      relations: ['category', 'segment', 'prices', 'prices.country', 'images', 'inventory'],
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
+  }
 }

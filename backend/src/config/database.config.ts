@@ -5,7 +5,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 
 @Injectable()
 export class DatabaseConfig implements TypeOrmOptionsFactory {
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) { }
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
@@ -17,7 +17,9 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
       database: this.configService.get('DB_NAME', 'ecommerce_db'),
       entities: [__dirname + '/../**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-      synchronize: this.configService.get('NODE_ENV') !== 'production',
+      // synchronize: this.configService.get('NODE_ENV') !== 'production',
+      synchronize: true,
+      dropSchema: true,
       logging: this.configService.get('NODE_ENV') === 'development',
     };
   }
