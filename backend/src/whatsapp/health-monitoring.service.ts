@@ -218,16 +218,16 @@ export class HealthMonitoringService {
     try {
       const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
       
-      const totalSubmissions = await this.submissionRepository.count({
-        where: { createdAt: { $gte: last24Hours } as any },
-      });
+      const totalSubmissions = await this.submissionRepository
+        .createQueryBuilder('submission')
+        .where('submission.createdAt >= :last24Hours', { last24Hours })
+        .getCount();
 
-      const failedSubmissions = await this.submissionRepository.count({
-        where: { 
-          processingStatus: 'failed',
-          createdAt: { $gte: last24Hours } as any,
-        },
-      });
+      const failedSubmissions = await this.submissionRepository
+        .createQueryBuilder('submission')
+        .where('submission.processingStatus = :status', { status: 'failed' })
+        .andWhere('submission.createdAt >= :last24Hours', { last24Hours })
+        .getCount();
 
       const errorRate = totalSubmissions > 0 ? (failedSubmissions / totalSubmissions) * 100 : 0;
 
@@ -283,12 +283,11 @@ export class HealthMonitoringService {
       // Check for stuck submissions (processing for more than 1 hour)
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
       
-      const stuckSubmissions = await this.submissionRepository.count({
-        where: {
-          processingStatus: 'processing',
-          updatedAt: { $lt: oneHourAgo } as any,
-        },
-      });
+      const stuckSubmissions = await this.submissionRepository
+        .createQueryBuilder('submission')
+        .where('submission.processingStatus = :status', { status: 'processing' })
+        .andWhere('submission.updatedAt < :oneHourAgo', { oneHourAgo })
+        .getCount();
 
       if (stuckSubmissions > 0) {
         return {
@@ -366,18 +365,18 @@ export class HealthMonitoringService {
       this.submissionRepository.count({ where: { processingStatus: 'processing' } }),
       this.submissionRepository.count({ where: { processingStatus: 'completed' } }),
       this.submissionRepository.count({ where: { processingStatus: 'failed' } }),
-      this.submissionRepository.count({ 
-        where: { createdAt: { $gte: last24Hours } as any },
-      }),
+      this.submissionRepository
+        .createQueryBuilder('submission')
+        .where('submission.createdAt >= :last24Hours', { last24Hours })
+        .getCount(),
     ]);
 
     // Processing metrics
-    const completedLogs = await this.processingLogRepository.find({
-      where: { 
-        processingStatus: 'completed',
-        createdAt: { $gte: last24Hours } as any,
-      },
-    });
+    const completedLogs = await this.processingLogRepository
+      .createQueryBuilder('log')
+      .where('log.processingStatus = :status', { status: 'completed' })
+      .andWhere('log.createdAt >= :last24Hours', { last24Hours })
+      .getMany();
 
     const averageTimeMs = completedLogs.length > 0
       ? completedLogs.reduce((sum, log) => sum + log.processingTimeMs, 0) / completedLogs.length
@@ -393,12 +392,11 @@ export class HealthMonitoringService {
     ]);
 
     // Error metrics
-    const errorLogs = await this.processingLogRepository.find({
-      where: {
-        processingStatus: 'failed',
-        createdAt: { $gte: last24Hours } as any,
-      },
-    });
+    const errorLogs = await this.processingLogRepository
+      .createQueryBuilder('log')
+      .where('log.processingStatus = :status', { status: 'failed' })
+      .andWhere('log.createdAt >= :last24Hours', { last24Hours })
+      .getMany();
 
     const errorsByStage = errorLogs.reduce((acc, log) => {
       acc[log.processingStage] = (acc[log.processingStage] || 0) + 1;
