@@ -12,6 +12,15 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { SuppliersService, CreateSupplierDto, UpdateSupplierDto } from './suppliers.service';
+import { TemplateService } from './template.service';
+import {
+  CreateTemplateDto,
+  UpdateTemplateDto,
+  TemplateFiltersDto,
+  TemplateValidationDto,
+  TemplateUsageDto,
+  TemplateRecommendationDto,
+} from './dto/template.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -20,7 +29,10 @@ import { UserRole } from '../entities/user.entity';
 @Controller('suppliers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SuppliersController {
-  constructor(private readonly suppliersService: SuppliersService) {}
+  constructor(
+    private readonly suppliersService: SuppliersService,
+    private readonly templateService: TemplateService,
+  ) {}
 
   @Post()
   @Roles(UserRole.ADMIN)
@@ -150,5 +162,94 @@ export class SuppliersController {
   @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string) {
     return this.suppliersService.remove(id);
+  }
+
+  // ==================== Template Management Endpoints ====================
+
+  @Post('templates')
+  @Roles(UserRole.ADMIN)
+  createTemplate(@Body() createTemplateDto: CreateTemplateDto) {
+    return this.templateService.create(createTemplateDto);
+  }
+
+  @Get('templates')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  findAllTemplates(@Query() filters: TemplateFiltersDto) {
+    return this.templateService.findAll(filters);
+  }
+
+  @Get('templates/:templateId')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  findOneTemplate(@Param('templateId') templateId: string) {
+    return this.templateService.findOne(templateId);
+  }
+
+  @Patch('templates/:templateId')
+  @Roles(UserRole.ADMIN)
+  updateTemplate(
+    @Param('templateId') templateId: string,
+    @Body() updateTemplateDto: UpdateTemplateDto,
+  ) {
+    return this.templateService.update(templateId, updateTemplateDto);
+  }
+
+  @Delete('templates/:templateId')
+  @Roles(UserRole.ADMIN)
+  removeTemplate(@Param('templateId') templateId: string) {
+    return this.templateService.remove(templateId);
+  }
+
+  @Post('templates/:templateId/validate')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @HttpCode(HttpStatus.OK)
+  validateTemplate(@Body() validationDto: TemplateValidationDto) {
+    return this.templateService.validateSubmission(validationDto);
+  }
+
+  @Post('templates/:templateId/usage')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @HttpCode(HttpStatus.OK)
+  recordTemplateUsage(@Body() usageDto: TemplateUsageDto) {
+    return this.templateService.recordUsage(usageDto);
+  }
+
+  @Get('templates/:templateId/analytics')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  getTemplateAnalytics(@Param('templateId') templateId: string) {
+    return this.templateService.getAnalytics(templateId);
+  }
+
+  @Post('templates/:templateId/clone')
+  @Roles(UserRole.ADMIN)
+  cloneTemplate(
+    @Param('templateId') templateId: string,
+    @Body('supplierId') supplierId: string,
+    @Body('customizations') customizations?: Partial<CreateTemplateDto>,
+  ) {
+    return this.templateService.cloneTemplate(templateId, supplierId, customizations);
+  }
+
+  @Post('templates/recommendations')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @HttpCode(HttpStatus.OK)
+  getTemplateRecommendations(@Body() recommendationDto: TemplateRecommendationDto) {
+    return this.templateService.getRecommendations(recommendationDto);
+  }
+
+  @Get(':id/templates')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  getSupplierTemplates(@Param('id') id: string) {
+    return this.templateService.getSupplierTemplates(id);
+  }
+
+  @Post('templates/:templateId/feedback')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @HttpCode(HttpStatus.OK)
+  provideTemplateFeedback(
+    @Param('templateId') templateId: string,
+    @Body('supplierId') supplierId: string,
+    @Body('feedback') feedback: string,
+  ) {
+    return this.templateService.provideFeedback(templateId, supplierId, feedback);
   }
 }
