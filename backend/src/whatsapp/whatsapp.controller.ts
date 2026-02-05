@@ -11,9 +11,12 @@ import {
   HttpException,
   Param,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { WhatsappService, WhatsAppWebhookPayload } from './whatsapp.service';
 import { RateLimiterService } from './rate-limiter.service';
+import { ErrorRecoveryService } from './error-recovery.service';
+import { HealthMonitoringService } from './health-monitoring.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -25,6 +28,8 @@ export class WhatsappController {
   constructor(
     private readonly whatsappService: WhatsappService,
     private readonly rateLimiterService: RateLimiterService,
+    private readonly errorRecoveryService: ErrorRecoveryService,
+    private readonly healthMonitoringService: HealthMonitoringService,
   ) {}
 
   @Post('webhook')
@@ -152,5 +157,101 @@ export class WhatsappController {
   @Roles(UserRole.ADMIN, UserRole.STAFF)
   async getSubmissionStats(@Query('supplierId') supplierId?: string) {
     return this.whatsappService.getSubmissionStats(supplierId);
+  }
+
+  // Health and Monitoring Endpoints
+
+  @Get('health')
+  @Public()
+  async getHealth() {
+    return this.healthMonitoringService.performHealthCheck();
+  }
+
+  @Get('health/metrics')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  async getMetrics() {
+    return this.healthMonitoringService.collectSystemMetrics();
+  }
+
+  @Get('health/diagnostics')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getDiagnostics() {
+    return this.healthMonitoringService.collectDiagnosticInfo();
+  }
+
+  @Get('health/errors')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getUnresolvedErrors() {
+    return this.healthMonitoringService.getUnresolvedErrors();
+  }
+
+  @Patch('health/errors/:errorId/resolve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async resolveError(@Param('errorId') errorId: string) {
+    await this.healthMonitoringService.resolveCriticalError(errorId);
+    return { success: true, message: 'Error resolved' };
+  }
+
+  // Error Recovery Endpoints
+
+  @Get('recovery/queue')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  async getFailedOperations() {
+    return this.errorRecoveryService.getFailedOperations();
+  }
+
+  @Get('recovery/queue/stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  async getQueueStats() {
+    return this.errorRecoveryService.getQueueStatistics();
+  }
+
+  @Post('recovery/retry/:submissionId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  async retrySubmission(@Param('submissionId') submissionId: string) {
+    const result = await this.errorRecoveryService.retryFailedSubmission(submissionId);
+    
+    if (!result.success) {
+      throw new BadRequestException(`Retry failed: ${result.error?.message}`);
+    }
+
+    return {
+      success: true,
+      attempts: result.attempts,
+      totalTime: result.totalTime,
+    };
+  }
+
+  @Get('recovery/logs/:submissionId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  async getProcessingLogs(@Param('submissionId') submissionId: string) {
+    return this.errorRecoveryService.getProcessingLogs(submissionId);
+  }
+
+  @Post('recovery/mark-failed/:submissionId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async markAsFailed(
+    @Param('submissionId') submissionId: string,
+    @Body('reason') reason: string,
+  ) {
+    if (!reason) {
+      throw new BadRequestException('Reason is required');
+    }
+
+    await this.errorRecoveryService.markSubmissionAsFailed(submissionId, reason);
+    
+    return {
+      success: true,
+      message: 'Submission marked as permanently failed',
+    };
   }
 }

@@ -8,6 +8,8 @@ import { AuditService } from '../audit/audit.service';
 import { MediaStorageService, MediaFile } from './media-storage.service';
 import { MessageGroupingService } from './message-grouping.service';
 import { AIProcessingService } from '../ai-processing/ai-processing.service';
+import { ErrorRecoveryService } from './error-recovery.service';
+import { HealthMonitoringService } from './health-monitoring.service';
 import { AuditAction, AuditResource } from '../entities/audit-log.entity';
 import * as crypto from 'crypto';
 
@@ -69,6 +71,8 @@ export class WhatsappService {
     private mediaStorageService: MediaStorageService,
     private messageGroupingService: MessageGroupingService,
     private aiProcessingService: AIProcessingService,
+    private errorRecoveryService: ErrorRecoveryService,
+    private healthMonitoringService: HealthMonitoringService,
   ) {}
 
   validateWebhookSignature(signature: string, payload: string): boolean {
@@ -288,13 +292,29 @@ export class WhatsappService {
     }
 
     try {
-      // Download and store the media file
-      const mediaFile = await this.mediaStorageService.downloadMediaFromWhatsApp(mediaId);
-      
+      // Use retry logic for media download (Requirement 10.1)
+      const result = await this.errorRecoveryService.executeWithRetry(
+        () => this.mediaStorageService.downloadMediaFromWhatsApp(mediaId),
+        `downloadMedia-${mediaId}`,
+        { maxRetries: 3, initialDelayMs: 500, maxDelayMs: 5000, backoffMultiplier: 2 }
+      );
+
+      if (!result.success || !result.result) {
+        throw new Error(`Media download failed after ${result.attempts} attempts`);
+      }
+
       // Return the local file path for storage in the database
-      return mediaFile.localPath;
+      return result.result.localPath;
     } catch (error) {
       console.error(`Failed to download media ${mediaId}:`, error.message);
+      
+      // Record critical error for monitoring (Requirement 10.4)
+      await this.healthMonitoringService.recordCriticalError(
+        'media-download',
+        `Failed to download media ${mediaId}: ${error.message}`,
+        'medium',
+        { mediaId, messageId: message.id }
+      );
       
       // Log the media download failure
       await this.auditService.logAction({
@@ -451,71 +471,90 @@ export class WhatsappService {
     const startTime = Date.now();
 
     try {
-      // Update status to processing
-      submission.processingStatus = 'processing';
-      await this.submissionRepository.save(submission);
+      // Use transaction for database operations (Requirement 10.3)
+      await this.errorRecoveryService.executeInTransaction(
+        async (queryRunner) => {
+          // Update status to processing
+          submission.processingStatus = 'processing';
+          await queryRunner.manager.save(submission);
 
-      // Log AI processing start
-      await this.logProcessingStage(submissionId, 'ai_extraction', 'started', 0);
+          // Log AI processing start
+          await this.logProcessingStage(submissionId, 'ai_extraction', 'started', 0);
 
-      let extractedProducts = [];
+          let extractedProducts = [];
 
-      // Process based on content type
-      switch (submission.contentType) {
-        case 'text':
-          extractedProducts = await this.aiProcessingService.processTextMessage(
-            submission.originalContent,
-            submission.supplier
+          // Process based on content type with retry logic (Requirement 10.1)
+          const result = await this.errorRecoveryService.executeWithRetry(
+            async () => {
+              switch (submission.contentType) {
+                case 'text':
+                  return await this.aiProcessingService.processTextMessage(
+                    submission.originalContent,
+                    submission.supplier
+                  );
+                case 'image':
+                  if (submission.mediaUrl) {
+                    return await this.aiProcessingService.processImage(
+                      submission.mediaUrl,
+                      submission.supplier
+                    );
+                  }
+                  return [];
+                case 'pdf':
+                  if (submission.mediaUrl) {
+                    return await this.aiProcessingService.processPDF(
+                      submission.mediaUrl,
+                      submission.supplier
+                    );
+                  }
+                  return [];
+                default:
+                  throw new Error(`Unsupported content type: ${submission.contentType}`);
+              }
+            },
+            `aiProcessing-${submissionId}`,
+            { maxRetries: 3, initialDelayMs: 2000, maxDelayMs: 30000, backoffMultiplier: 2 }
           );
-          break;
-        case 'image':
-          if (submission.mediaUrl) {
-            extractedProducts = await this.aiProcessingService.processImage(
-              submission.mediaUrl,
-              submission.supplier
-            );
+
+          if (!result.success) {
+            throw result.error || new Error('AI processing failed');
           }
-          break;
-        case 'pdf':
-          if (submission.mediaUrl) {
-            extractedProducts = await this.aiProcessingService.processPDF(
-              submission.mediaUrl,
-              submission.supplier
-            );
-          }
-          break;
-        default:
-          throw new Error(`Unsupported content type: ${submission.contentType}`);
-      }
 
-      // Store extracted data
-      submission.extractedData = extractedProducts;
-      submission.processingStatus = 'completed';
-      await this.submissionRepository.save(submission);
+          extractedProducts = result.result || [];
 
-      const processingTime = Date.now() - startTime;
+          // Store extracted data
+          submission.extractedData = extractedProducts;
+          submission.processingStatus = 'completed';
+          await queryRunner.manager.save(submission);
 
-      // Log successful AI processing
-      await this.logProcessingStage(submissionId, 'ai_extraction', 'completed', processingTime, null, {
-        extractedProductsCount: extractedProducts.length,
-        averageConfidence: extractedProducts.length > 0 
-          ? extractedProducts.reduce((sum, p) => sum + p.confidenceScore, 0) / extractedProducts.length 
-          : 0,
-      });
+          const processingTime = Date.now() - startTime;
 
-      // Log audit trail
-      await this.auditService.logAction({
-        action: AuditAction.SUPPLIER_SUBMISSION,
-        resource: AuditResource.SUPPLIER_SUBMISSION,
-        resourceId: submissionId,
-        description: `AI processing completed for submission from ${submission.supplier.name}`,
-        metadata: {
-          supplierId: submission.supplier.id,
-          contentType: submission.contentType,
-          extractedProductsCount: extractedProducts.length,
-          processingTime,
+          // Log successful AI processing
+          await this.logProcessingStage(submissionId, 'ai_extraction', 'completed', processingTime, null, {
+            extractedProductsCount: extractedProducts.length,
+            averageConfidence: extractedProducts.length > 0 
+              ? extractedProducts.reduce((sum, p) => sum + p.confidenceScore, 0) / extractedProducts.length 
+              : 0,
+            retryAttempts: result.attempts - 1,
+          });
+
+          // Log audit trail
+          await this.auditService.logAction({
+            action: AuditAction.SUPPLIER_SUBMISSION,
+            resource: AuditResource.SUPPLIER_SUBMISSION,
+            resourceId: submissionId,
+            description: `AI processing completed for submission from ${submission.supplier.name}`,
+            metadata: {
+              supplierId: submission.supplier.id,
+              contentType: submission.contentType,
+              extractedProductsCount: extractedProducts.length,
+              processingTime,
+              retryAttempts: result.attempts - 1,
+            },
+          });
         },
-      });
+        `processSubmissionWithAI-${submissionId}`
+      );
 
     } catch (error) {
       // Update status to failed
@@ -526,6 +565,29 @@ export class WhatsappService {
 
       // Log failed AI processing
       await this.logProcessingStage(submissionId, 'ai_extraction', 'failed', processingTime, error.message);
+
+      // Queue for retry (Requirement 10.2)
+      await this.errorRecoveryService.queueFailedOperation(
+        'ai_extraction',
+        error,
+        submissionId,
+        {
+          contentType: submission.contentType,
+          supplierId: submission.supplier.id,
+        }
+      );
+
+      // Record critical error (Requirement 10.4)
+      await this.healthMonitoringService.recordCriticalError(
+        'ai-processing',
+        `AI processing failed for submission ${submissionId}: ${error.message}`,
+        'high',
+        {
+          submissionId,
+          contentType: submission.contentType,
+          supplierId: submission.supplier.id,
+        }
+      );
 
       // Log audit trail
       await this.auditService.logAction({

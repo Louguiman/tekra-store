@@ -66,6 +66,8 @@ describe('Feature: whatsapp-supplier-automation, Property 3: AI Extraction Field
       qualityRating: 3,
     }),
     preferredCategories: fc.constant(['electronics']),
+    email: fc.constant('supplier@example.com'),
+    contactPerson: fc.constant('John Doe'),
     createdAt: fc.constant(new Date()),
     updatedAt: fc.constant(new Date()),
     submissions: fc.constant([]),
