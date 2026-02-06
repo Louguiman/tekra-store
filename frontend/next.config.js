@@ -11,14 +11,7 @@ const nextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/:path*`,
-      },
-    ];
-  },
+  // Removed rewrites - using catch-all API route at /api/[...proxy] instead
 };
 
 module.exports = nextConfig;
