@@ -36,15 +36,25 @@ export class AuthService {
       ],
     });
 
-    if (!user || !user.passwordHash) {
+    if (!user) {
+      console.log(`[Auth] User not found: ${identifier}`);
       return null;
     }
 
+    if (!user.passwordHash) {
+      console.log(`[Auth] User has no password hash: ${identifier}`);
+      return null;
+    }
+
+    console.log(`[Auth] Validating password for user: ${identifier} (role: ${user.role})`);
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    
     if (!isPasswordValid) {
+      console.log(`[Auth] Invalid password for user: ${identifier}`);
       return null;
     }
 
+    console.log(`[Auth] Password valid for user: ${identifier}`);
     return user;
   }
 
