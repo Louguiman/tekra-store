@@ -1,9 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-// Direct API calls to backend (for Vercel deployment)
-// Use environment variable for API URL
+// Use Vercel API proxy to avoid mixed content errors
+// Browser (HTTPS) → Vercel API Route (server-side) → Backend (HTTP) ✅
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  baseUrl: '/api/proxy', // Proxy through Vercel API routes
   credentials: 'include', // Important for session-based cart
   prepareHeaders: (headers) => {
     // Add auth token if available (prioritize admin token)

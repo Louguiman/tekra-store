@@ -30,14 +30,13 @@ export default function HomePage() {
 
   const fetchHomePageData = async () => {
     try {
-      // Call backend API directly (for Vercel deployment)
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-      
+      // Use Vercel API proxy to avoid mixed content errors
+      // Browser (HTTPS) → Vercel API Route (server-side) → Backend (HTTP) ✅
       const [featured, trending, deals, arrivals] = await Promise.all([
-        fetch(`${apiUrl}/products/featured?limit=8`).then(r => r.json()),
-        fetch(`${apiUrl}/products/trending?limit=8`).then(r => r.json()),
-        fetch(`${apiUrl}/products/deals?limit=8`).then(r => r.json()),
-        fetch(`${apiUrl}/products/new-arrivals?limit=8`).then(r => r.json()),
+        fetch('/api/proxy/products/featured?limit=8').then(r => r.json()),
+        fetch('/api/proxy/products/trending?limit=8').then(r => r.json()),
+        fetch('/api/proxy/products/deals?limit=8').then(r => r.json()),
+        fetch('/api/proxy/products/new-arrivals?limit=8').then(r => r.json()),
       ]);
 
       setFeaturedProducts(featured);
