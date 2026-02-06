@@ -396,7 +396,10 @@ export class ProductsService {
     const allowedSortFields = ['createdAt', 'updatedAt', 'name', 'brand'];
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
     
-    queryBuilder.orderBy(`product.${sortField}`, sortOrder);
+    // Normalize sortOrder to uppercase (TypeORM only accepts 'ASC' or 'DESC')
+    const normalizedSortOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    
+    queryBuilder.orderBy(`product.${sortField}`, normalizedSortOrder);
   }
 
   private generateSlug(name: string): string {
