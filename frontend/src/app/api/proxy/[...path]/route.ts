@@ -4,8 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Backend API URL - can be HTTP because this runs server-side
-const API_URL = process.env.BACKEND_API_URL || process.env.API_URL || 'http://89.116.229.113:3001/api';
+// Hardcoded backend API URL - runs server-side so HTTP is allowed
+const API_URL = 'http://89.116.229.113:3001/api';
 
 /**
  * Catch-all proxy route for all backend API requests
