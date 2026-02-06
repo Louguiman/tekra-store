@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Animated Gaming Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-dark-50 via-dark-100 to-dark-200"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-dark-50 via-dark-100 to-dark-200 z-0"></div>
       
       {/* Floating gaming elements - behind form */}
       <div className="absolute top-20 left-10 w-32 h-32 bg-primary-500/20 rounded-full blur-2xl animate-float z-0"></div>
