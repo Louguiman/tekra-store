@@ -33,10 +33,10 @@ export default function HomePage() {
       // Use Vercel API proxy to avoid mixed content errors
       // Browser (HTTPS) → Vercel API Route (server-side) → Backend (HTTP) ✅
       const [featured, trending, deals, arrivals] = await Promise.all([
-        fetch('/api/proxy/products/featured?limit=8').then(r => r.json()),
-        fetch('/api/proxy/products/trending?limit=8').then(r => r.json()),
-        fetch('/api/proxy/products/deals?limit=8').then(r => r.json()),
-        fetch('/api/proxy/products/new-arrivals?limit=8').then(r => r.json()),
+        fetch('/api/products/featured?limit=8').then(r => r.json()),
+        fetch('/api/products/trending?limit=8').then(r => r.json()),
+        fetch('/api/products/deals?limit=8').then(r => r.json()),
+        fetch('/api/products/new-arrivals?limit=8').then(r => r.json()),
       ]);
 
       setFeaturedProducts(featured);

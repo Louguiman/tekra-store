@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 // Use Vercel API proxy to avoid mixed content errors
 // Browser (HTTPS) → Vercel API Route (server-side) → Backend (HTTP) ✅
 const baseQuery = fetchBaseQuery({
-  baseUrl: '/api/proxy', // Proxy through Vercel API routes
+  baseUrl: '/api', // Proxy through Vercel API routes (catch-all at /api/[...proxy])
   credentials: 'include', // Important for session-based cart
   prepareHeaders: (headers) => {
     // Add auth token if available (prioritize admin token)
