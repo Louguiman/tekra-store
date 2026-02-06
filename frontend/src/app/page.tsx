@@ -3,6 +3,9 @@
 import { CountrySelector } from '@/components/country-selector'
 import { CategoryGrid } from '@/components/products/category-grid'
 import { ProductGrid } from '@/components/products/product-grid'
+import { PromoBanner } from '@/components/home/promo-banner'
+import { SplitBanner } from '@/components/home/split-banner'
+import { CountdownBanner } from '@/components/home/countdown-banner'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -139,6 +142,20 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* Promo Banner - Free Shipping */}
+      <PromoBanner
+        title="FREE SHIPPING ACROSS WEST AFRICA"
+        subtitle="Get your gaming gear delivered to your doorstep at no extra cost. Limited time offer on orders above 100,000 FCFA!"
+        ctaText="SHOP NOW"
+        ctaLink="/products"
+        variant="primary"
+        icon={
+          <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+        }
+      />
+
       {/* Epic Deals Banner */}
       {!loading && dealsProducts.length > 0 && (
         <section className="py-20 relative overflow-hidden">
@@ -188,6 +205,20 @@ export default function HomePage() {
           <CategoryGrid />
         </div>
       </section>
+
+      {/* Split Banner - Gaming vs Productivity */}
+      <SplitBanner
+        leftTitle="GAMING ZONE"
+        leftSubtitle="High-performance gaming laptops, desktops, and accessories for the ultimate gaming experience"
+        leftCta="EXPLORE GAMING"
+        leftLink="/categories/gaming"
+        leftGradient="from-primary-600 to-secondary-600"
+        rightTitle="PRODUCTIVITY HUB"
+        rightSubtitle="Professional workstations, monitors, and tools to boost your productivity"
+        rightCta="EXPLORE PRODUCTIVITY"
+        rightLink="/categories/productivity"
+        rightGradient="from-accent-600 to-primary-600"
+      />
 
       {/* Trending Now Section */}
       {!loading && trendingProducts.length > 0 && (
@@ -242,6 +273,15 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Countdown Banner - Flash Sale */}
+      <CountdownBanner
+        title="MEGA FLASH SALE"
+        subtitle="Up to 50% OFF on selected gaming gear. Don't miss out!"
+        endDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)} // 7 days from now
+        ctaText="GRAB THE DEALS NOW"
+        ctaLink="/products?isRefurbished=true"
+      />
 
       {/* Gaming Features Section */}
       <section className="py-20 relative overflow-hidden">
@@ -303,6 +343,20 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Promo Banner - Trade-In Program */}
+      <PromoBanner
+        title="TRADE-IN YOUR OLD GEAR"
+        subtitle="Upgrade to the latest tech and get instant credit for your old devices. Turn your old gaming setup into your new dream rig!"
+        ctaText="START TRADE-IN"
+        ctaLink="/support"
+        variant="accent"
+        icon={
+          <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+        }
+      />
 
       {/* Testimonials Banner */}
       <section className="py-20 relative overflow-hidden">
