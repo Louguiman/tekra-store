@@ -19,6 +19,7 @@ import { AuditModule } from './audit/audit.module';
 import { DataImportExportModule } from './data-import-export/data-import-export.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
+import { SeederModule } from './seeds/seeder.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -30,6 +31,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     TypeOrmModule.forRootAsync({
       useClass: DatabaseConfig,
     }),
+    SeederModule, // Add seeder module for automatic database seeding
     AuthModule,
     AdminModule,
     ProductsModule,
