@@ -30,12 +30,14 @@ export default function HomePage() {
 
   const fetchHomePageData = async () => {
     try {
-      // Use Next.js API routes which proxy to backend using internal Docker network
+      // Call backend API directly (for Vercel deployment)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      
       const [featured, trending, deals, arrivals] = await Promise.all([
-        fetch('/api/products/featured?limit=8').then(r => r.json()),
-        fetch('/api/products/trending?limit=8').then(r => r.json()),
-        fetch('/api/products/deals?limit=8').then(r => r.json()),
-        fetch('/api/products/new-arrivals?limit=8').then(r => r.json()),
+        fetch(`${apiUrl}/products/featured?limit=8`).then(r => r.json()),
+        fetch(`${apiUrl}/products/trending?limit=8`).then(r => r.json()),
+        fetch(`${apiUrl}/products/deals?limit=8`).then(r => r.json()),
+        fetch(`${apiUrl}/products/new-arrivals?limit=8`).then(r => r.json()),
       ]);
 
       setFeaturedProducts(featured);

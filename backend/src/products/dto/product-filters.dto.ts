@@ -42,6 +42,10 @@ export class ProductFiltersDto {
   countryId?: string;
 
   @IsOptional()
+  @IsString()
+  countryCode?: string;
+
+  @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   isRefurbished?: boolean;
 

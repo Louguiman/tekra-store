@@ -93,6 +93,25 @@ export function Header() {
             </Link>
           </nav>
 
+          {/* Auth Links - Desktop */}
+          <div className="hidden lg:flex items-center space-x-3">
+            <Link 
+              href="/auth/login"
+              className="px-4 py-2 font-tech font-semibold text-dark-700 hover:text-primary-500 transition-colors duration-300"
+            >
+              {t('nav.login')}
+            </Link>
+            <Link 
+              href="/auth/register"
+              className="relative group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg blur opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+              <div className="relative bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-tech font-bold px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                {t('nav.register')}
+              </div>
+            </Link>
+          </div>
+
           {/* Right side gaming controls */}
           <div className="flex items-center space-x-4">
             {/* Language Switcher - Desktop */}
@@ -204,6 +223,27 @@ export function Header() {
                 {t('nav.support')}
               </Link>
             </nav>
+
+            {/* Mobile Auth Links */}
+            <div className="mt-6 space-y-3">
+              <Link 
+                href="/auth/login"
+                className="block py-3 px-4 text-center text-dark-700 hover:text-primary-500 font-tech font-semibold bg-dark-200/30 rounded-lg hover:bg-dark-200/50 transition-all duration-300 border-2 border-dark-300"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('nav.login')}
+              </Link>
+              <Link 
+                href="/auth/register"
+                className="block relative group"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg blur opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-tech font-bold py-3 px-4 rounded-lg shadow-lg text-center">
+                  {t('nav.register')}
+                </div>
+              </Link>
+            </div>
 
             {/* Mobile WhatsApp */}
             <div className="mt-6 sm:hidden">

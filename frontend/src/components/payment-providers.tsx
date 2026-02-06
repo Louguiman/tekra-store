@@ -58,6 +58,47 @@ export function PaymentProviders({ selectedProvider, onProviderSelect, orderAmou
       <h3 className="text-lg font-semibold text-gray-900">Méthodes de paiement</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Cash on Delivery Option */}
+        <div
+          className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+            selectedProvider === 'cash_on_delivery'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 hover:border-gray-300'
+          }`}
+          onClick={() => onProviderSelect?.('cash_on_delivery')}
+        >
+          <div className="flex items-center">
+            <input
+              type="radio"
+              name="paymentProvider"
+              value="cash_on_delivery"
+              checked={selectedProvider === 'cash_on_delivery'}
+              onChange={() => onProviderSelect?.('cash_on_delivery')}
+              className="mr-3 text-blue-600"
+            />
+            
+            <div className="flex-1">
+              <div className="flex items-center">
+                <span className="text-2xl mr-2">💵</span>
+                <div>
+                  <h4 className="font-medium text-gray-900">Paiement à la livraison</h4>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border-green-200">
+                    Espèces
+                  </span>
+                </div>
+              </div>
+              
+              <div className="mt-1 text-sm text-green-600 font-medium">
+                Aucun frais supplémentaire
+              </div>
+              <div className="mt-1 text-xs text-gray-500">
+                Payez en espèces lors de la réception
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Online Payment Providers */}
         {paymentProviders.map((provider) => {
           const processingFee = provider.processingFee ? calculateProcessingFee(orderAmount, provider.processingFee) : 0
           const totalAmount = orderAmount + processingFee
@@ -123,7 +164,7 @@ export function PaymentProviders({ selectedProvider, onProviderSelect, orderAmou
               <span>Montant de la commande:</span>
               <span>{formatFCFA(orderAmount)}</span>
             </div>
-            {selectedProvider && (
+            {selectedProvider && selectedProvider !== 'cash_on_delivery' && (
               <>
                 {(() => {
                   const provider = paymentProviders.find(p => p.id === selectedProvider)
@@ -147,6 +188,12 @@ export function PaymentProviders({ selectedProvider, onProviderSelect, orderAmou
                   )
                 })()}
               </>
+            )}
+            {selectedProvider === 'cash_on_delivery' && (
+              <div className="flex justify-between font-semibold border-t pt-2 mt-2">
+                <span>Total à payer:</span>
+                <span>{formatFCFA(orderAmount)}</span>
+              </div>
             )}
           </div>
         </div>

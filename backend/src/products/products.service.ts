@@ -369,16 +369,21 @@ export class ProductsService {
       queryBuilder.andWhere('product.refurbishedGrade IN (:...refurbishedGrades)', { refurbishedGrades: filters.refurbishedGrades });
     }
 
-    if (filters.countryId && (filters.minPrice !== undefined || filters.maxPrice !== undefined)) {
+    // Handle both countryId and countryCode for price filtering
+    const countryFilter = filters.countryId || filters.countryCode;
+    if (countryFilter && (filters.minPrice !== undefined || filters.maxPrice !== undefined)) {
+      // If countryCode is provided, filter by country code, otherwise by ID
+      const countryField = filters.countryCode ? 'prices.country.code' : 'prices.country.id';
+      
       if (filters.minPrice !== undefined) {
-        queryBuilder.andWhere('prices.country.id = :countryId AND prices.price >= :minPrice', {
-          countryId: filters.countryId,
+        queryBuilder.andWhere(`${countryField} = :countryFilter AND prices.price >= :minPrice`, {
+          countryFilter,
           minPrice: filters.minPrice,
         });
       }
       if (filters.maxPrice !== undefined) {
-        queryBuilder.andWhere('prices.country.id = :countryId AND prices.price <= :maxPrice', {
-          countryId: filters.countryId,
+        queryBuilder.andWhere(`${countryField} = :countryFilter AND prices.price <= :maxPrice`, {
+          countryFilter,
           maxPrice: filters.maxPrice,
         });
       }

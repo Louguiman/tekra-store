@@ -32,8 +32,95 @@
     "support": "Support",
     "admin": "Admin",
     "login": "Connexion",
+    "register": "S'inscrire",
     "logout": "Déconnexion",
     "myAccount": "Mon Compte"
+  },
+  "auth": {
+    "login": {
+      "title": "CONNEXION JOUEUR",
+      "subtitle": "Accédez à votre compte gaming",
+      "loginMethod": "Méthode de Connexion",
+      "email": "📧 Adresse Email",
+      "phone": "📱 Numéro de Téléphone",
+      "emailPlaceholder": "gamer@exemple.com",
+      "phonePlaceholder": "+221 XX XXX XX XX",
+      "password": "Mot de Passe",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Mot de passe oublié ?",
+      "submit": "ENTRER DANS LE JEU",
+      "authenticating": "AUTHENTIFICATION...",
+      "backToHome": "Retour à l'Accueil",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "createAccount": "Créer un Compte",
+      "error": "Échec de la connexion. Vérifiez vos identifiants."
+    },
+    "register": {
+      "title": "REJOINDRE LE JEU",
+      "subtitle": "Créez votre compte gaming",
+      "fullName": "Nom Complet",
+      "fullNamePlaceholder": "Jean Dupont",
+      "email": "Adresse Email",
+      "emailPlaceholder": "gamer@exemple.com",
+      "optional": "optionnel",
+      "phone": "Numéro de Téléphone",
+      "phonePlaceholder": "+221 XX XXX XX XX",
+      "country": "Pays",
+      "password": "Mot de Passe",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirmer le Mot de Passe",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submit": "CRÉER UN COMPTE",
+      "creating": "CRÉATION DU COMPTE...",
+      "backToHome": "Retour à l'Accueil",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signIn": "Se Connecter",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "error": "Échec de l'inscription. Veuillez réessayer."
+    },
+    "forgotPassword": {
+      "title": "RÉINITIALISER LE MOT DE PASSE",
+      "subtitle": "Nous vous aiderons à revenir dans le jeu",
+      "resetMethod": "Méthode de Réinitialisation",
+      "email": "📧 Adresse Email",
+      "phone": "📱 Numéro de Téléphone",
+      "emailPlaceholder": "gamer@exemple.com",
+      "phonePlaceholder": "+221 XX XXX XX XX",
+      "submit": "ENVOYER LE LIEN",
+      "sending": "ENVOI EN COURS...",
+      "backToHome": "Retour à l'Accueil",
+      "rememberPassword": "Vous vous souvenez de votre mot de passe ?",
+      "signIn": "Se Connecter",
+      "successTitle": "Lien Envoyé !",
+      "successMessage": "Consultez votre email ou téléphone pour les instructions de réinitialisation.",
+      "backToLogin": "RETOUR À LA CONNEXION",
+      "error": "Échec de l'envoi du lien. Veuillez réessayer."
+    }
+  },
+  "profile": {
+    "title": "MON PROFIL",
+    "subtitle": "Gérez votre compte gaming",
+    "customer": "Client Gaming",
+    "nav": {
+      "overview": "Aperçu",
+      "orders": "Mes Commandes",
+      "logout": "Déconnexion"
+    },
+    "info": {
+      "title": "Informations du Profil",
+      "fullName": "Nom Complet",
+      "email": "Adresse Email",
+      "phone": "Numéro de Téléphone",
+      "country": "Pays",
+      "memberSince": "Membre Depuis"
+    },
+    "actions": {
+      "title": "Actions Rapides",
+      "viewOrders": "Voir les Commandes",
+      "viewOrdersDesc": "Suivez vos achats",
+      "continueShopping": "Continuer les Achats",
+      "continueShoppingDesc": "Explorez plus de produits"
+    }
   },
   "home": {
     "hero": {

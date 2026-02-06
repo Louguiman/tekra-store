@@ -1,9 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-// Use relative URLs to leverage Next.js API routes (proxy)
-// This allows the frontend to use internal Docker network via proxy
+// Direct API calls to backend (for Vercel deployment)
+// Use environment variable for API URL
 const baseQuery = fetchBaseQuery({
-  baseUrl: '/api/backend', // Proxy through Next.js API routes
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
   credentials: 'include', // Important for session-based cart
   prepareHeaders: (headers) => {
     // Add auth token if available (prioritize admin token)

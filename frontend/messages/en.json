@@ -32,8 +32,95 @@
     "support": "Support",
     "admin": "Admin",
     "login": "Login",
+    "register": "Register",
     "logout": "Logout",
     "myAccount": "My Account"
+  },
+  "auth": {
+    "login": {
+      "title": "PLAYER LOGIN",
+      "subtitle": "Access your gaming account",
+      "loginMethod": "Login Method",
+      "email": "📧 Email Address",
+      "phone": "📱 Phone Number",
+      "emailPlaceholder": "gamer@example.com",
+      "phonePlaceholder": "+221 XX XXX XX XX",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot Password?",
+      "submit": "ENTER GAME",
+      "authenticating": "AUTHENTICATING...",
+      "backToHome": "Back to Homepage",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create Account",
+      "error": "Login failed. Please check your credentials."
+    },
+    "register": {
+      "title": "JOIN THE GAME",
+      "subtitle": "Create your gaming account",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "gamer@example.com",
+      "optional": "optional",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+221 XX XXX XX XX",
+      "country": "Country",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submit": "CREATE ACCOUNT",
+      "creating": "CREATING ACCOUNT...",
+      "backToHome": "Back to Homepage",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign In",
+      "passwordMismatch": "Passwords do not match",
+      "error": "Registration failed. Please try again."
+    },
+    "forgotPassword": {
+      "title": "RESET PASSWORD",
+      "subtitle": "We'll help you get back in the game",
+      "resetMethod": "Reset Method",
+      "email": "📧 Email Address",
+      "phone": "📱 Phone Number",
+      "emailPlaceholder": "gamer@example.com",
+      "phonePlaceholder": "+221 XX XXX XX XX",
+      "submit": "SEND RESET LINK",
+      "sending": "SENDING...",
+      "backToHome": "Back to Homepage",
+      "rememberPassword": "Remember your password?",
+      "signIn": "Sign In",
+      "successTitle": "Reset Link Sent!",
+      "successMessage": "Check your email or phone for password reset instructions.",
+      "backToLogin": "BACK TO LOGIN",
+      "error": "Failed to send reset link. Please try again."
+    }
+  },
+  "profile": {
+    "title": "MY PROFILE",
+    "subtitle": "Manage your gaming account",
+    "customer": "Gaming Customer",
+    "nav": {
+      "overview": "Overview",
+      "orders": "My Orders",
+      "logout": "Logout"
+    },
+    "info": {
+      "title": "Profile Information",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "country": "Country",
+      "memberSince": "Member Since"
+    },
+    "actions": {
+      "title": "Quick Actions",
+      "viewOrders": "View Orders",
+      "viewOrdersDesc": "Track your purchases",
+      "continueShopping": "Continue Shopping",
+      "continueShoppingDesc": "Explore more products"
+    }
   },
   "home": {
     "hero": {
