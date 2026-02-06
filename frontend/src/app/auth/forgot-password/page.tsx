@@ -65,13 +65,13 @@ export default function ForgotPasswordPage() {
       {/* Animated Gaming Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-dark-50 via-dark-100 to-dark-200"></div>
       
-      {/* Floating gaming elements */}
-      <div className="absolute top-20 left-10 w-32 h-32 bg-primary-500/20 rounded-full blur-2xl animate-float"></div>
-      <div className="absolute bottom-20 right-10 w-48 h-48 bg-secondary-500/20 rounded-full blur-2xl animate-float" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute top-1/2 right-1/3 w-24 h-24 bg-accent-500/20 rounded-full blur-xl animate-float" style={{ animationDelay: '4s' }}></div>
+      {/* Floating gaming elements - behind form */}
+      <div className="absolute top-20 left-10 w-32 h-32 bg-primary-500/20 rounded-full blur-2xl animate-float z-0"></div>
+      <div className="absolute bottom-20 right-10 w-48 h-48 bg-secondary-500/20 rounded-full blur-2xl animate-float z-0" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-1/2 right-1/3 w-24 h-24 bg-accent-500/20 rounded-full blur-xl animate-float z-0" style={{ animationDelay: '4s' }}></div>
 
-      {/* Forgot Password Card */}
-      <div className="relative z-10 w-full max-w-md px-4">
+      {/* Forgot Password Card - above background */}
+      <div className="relative z-20 w-full max-w-md px-4">
         <div className="card-gaming p-8 md:p-10">
           {/* Header */}
           <div className="text-center mb-8">
