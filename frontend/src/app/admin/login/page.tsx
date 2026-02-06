@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { loginStart, loginSuccess, loginFailure, clearError } from '@/store/slices/adminAuthSlice'
 import { useAdminLoginMutation } from '@/store/api'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function AdminLoginPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { isAuthenticated, isLoading, error } = useAppSelector((state) => state.adminAuth)
   const [adminLogin] = useAdminLoginMutation()
+  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -89,11 +91,11 @@ export default function AdminLoginPage() {
             </div>
             <h2 className="text-3xl md:text-4xl font-gaming font-bold mb-2">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
-                ADMIN ACCESS
+                {t('admin.login.title')}
               </span>
             </h2>
             <p className="text-dark-600 font-tech">
-              Sign in to command center
+              {t('admin.login.subtitle')}
             </p>
           </div>
 
@@ -102,7 +104,7 @@ export default function AdminLoginPage() {
             {/* Login Type Selector */}
             <div>
               <label htmlFor="loginType" className="block text-sm font-tech font-semibold text-dark-700 mb-2">
-                Login Method
+                {t('admin.login.loginMethod')}
               </label>
               <select
                 id="loginType"
@@ -111,8 +113,8 @@ export default function AdminLoginPage() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 bg-dark-50 border-2 border-dark-200 rounded-lg font-tech text-dark-800 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
               >
-                <option value="email">📧 Email Address</option>
-                <option value="phone">📱 Phone Number</option>
+                <option value="email">{t('admin.login.email')}</option>
+                <option value="phone">{t('admin.login.phone')}</option>
               </select>
             </div>
 
@@ -120,7 +122,7 @@ export default function AdminLoginPage() {
             {formData.loginType === 'email' ? (
               <div>
                 <label htmlFor="email" className="block text-sm font-tech font-semibold text-dark-700 mb-2">
-                  Email Address
+                  {t('admin.login.email')}
                 </label>
                 <input
                   id="email"
@@ -131,13 +133,13 @@ export default function AdminLoginPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-dark-50 border-2 border-dark-200 rounded-lg font-tech text-dark-800 placeholder-dark-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
-                  placeholder="admin@example.com"
+                  placeholder={t('admin.login.emailPlaceholder')}
                 />
               </div>
             ) : (
               <div>
                 <label htmlFor="phone" className="block text-sm font-tech font-semibold text-dark-700 mb-2">
-                  Phone Number
+                  {t('admin.login.phone')}
                 </label>
                 <input
                   id="phone"
@@ -148,7 +150,7 @@ export default function AdminLoginPage() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-dark-50 border-2 border-dark-200 rounded-lg font-tech text-dark-800 placeholder-dark-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
-                  placeholder="+221 XX XXX XX XX"
+                  placeholder={t('admin.login.phonePlaceholder')}
                 />
               </div>
             )}
@@ -156,7 +158,7 @@ export default function AdminLoginPage() {
             {/* Password Input */}
             <div>
               <label htmlFor="password" className="block text-sm font-tech font-semibold text-dark-700 mb-2">
-                Password
+                {t('admin.login.password')}
               </label>
               <input
                 id="password"
@@ -167,7 +169,7 @@ export default function AdminLoginPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 bg-dark-50 border-2 border-dark-200 rounded-lg font-tech text-dark-800 placeholder-dark-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
-                placeholder="••••••••"
+                placeholder={t('admin.login.passwordPlaceholder')}
               />
             </div>
 
@@ -197,14 +199,14 @@ export default function AdminLoginPage() {
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-3">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>AUTHENTICATING...</span>
+                    <span>{t('admin.login.authenticating')}</span>
                   </div>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    ENTER COMMAND CENTER
+                    {t('admin.login.submit')}
                   </span>
                 )}
               </div>
@@ -214,7 +216,7 @@ export default function AdminLoginPage() {
           {/* Footer */}
           <div className="mt-8 pt-6 border-t border-dark-200">
             <p className="text-center text-sm font-tech text-dark-500">
-              🔒 Secure admin authentication
+              {t('admin.login.secureAuth')}
             </p>
           </div>
         </div>
@@ -228,7 +230,7 @@ export default function AdminLoginPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Homepage
+            {t('admin.login.backToHome')}
           </button>
         </div>
       </div>

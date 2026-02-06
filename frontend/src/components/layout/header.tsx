@@ -7,6 +7,8 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { CountrySelector } from '@/components/country-selector'
 import { WhatsAppButton } from '@/components/support/whatsapp-button'
+import { LanguageSwitcher } from '@/components/language-switcher'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export function Header() {
   const router = useRouter()
@@ -14,6 +16,7 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { totalItems } = useSelector((state: RootState) => state.cart)
   const { selectedCountry } = useSelector((state: RootState) => state.country)
+  const { t } = useLanguage()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,21 +80,26 @@ export function Header() {
           {/* Gaming Navigation - Desktop */}
           <nav className="hidden lg:flex items-center space-x-8">
             <Link href="/products" className="nav-link">
-              <span className="font-tech">Products</span>
+              <span className="font-tech">{t('nav.products')}</span>
             </Link>
             <Link href="/categories" className="nav-link">
-              <span className="font-tech">Categories</span>
+              <span className="font-tech">{t('nav.categories')}</span>
             </Link>
             <Link href="/about" className="nav-link">
               <span className="font-tech">About</span>
             </Link>
             <Link href="/support" className="nav-link">
-              <span className="font-tech">Support</span>
+              <span className="font-tech">{t('nav.support')}</span>
             </Link>
           </nav>
 
           {/* Right side gaming controls */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-4">
+            {/* Language Switcher - Desktop */}
+            <div className="hidden sm:block">
+              <LanguageSwitcher />
+            </div>
+
             {/* Country Selector - Desktop */}
             <div className="hidden sm:block">
               <CountrySelector />
@@ -155,6 +163,11 @@ export function Header() {
               </form>
             </div>
 
+            {/* Mobile Language Switcher */}
+            <div className="mb-6 sm:hidden">
+              <LanguageSwitcher />
+            </div>
+
             {/* Mobile Country Selector */}
             <div className="mb-6 sm:hidden">
               <CountrySelector />
@@ -167,14 +180,14 @@ export function Header() {
                 className="block py-3 px-4 text-dark-700 hover:text-primary-500 font-tech font-medium bg-dark-200/30 rounded-lg hover:bg-dark-200/50 transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Products
+                {t('nav.products')}
               </Link>
               <Link 
                 href="/categories" 
                 className="block py-3 px-4 text-dark-700 hover:text-primary-500 font-tech font-medium bg-dark-200/30 rounded-lg hover:bg-dark-200/50 transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Categories
+                {t('nav.categories')}
               </Link>
               <Link 
                 href="/about" 
@@ -188,7 +201,7 @@ export function Header() {
                 className="block py-3 px-4 text-dark-700 hover:text-primary-500 font-tech font-medium bg-dark-200/30 rounded-lg hover:bg-dark-200/50 transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Support
+                {t('nav.support')}
               </Link>
             </nav>
 

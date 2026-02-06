@@ -103,6 +103,31 @@
       "viewAll": "VOIR TOUS LES PRODUITS",
       "exploreDeals": "EXPLORER TOUTES LES OFFRES",
       "seeNewArrivals": "VOIR TOUTES LES NOUVEAUTÉS"
+    },
+    "banners": {
+      "freeShipping": {
+        "title": "LIVRAISON GRATUITE EN AFRIQUE DE L'OUEST",
+        "subtitle": "Recevez votre équipement gaming à votre porte sans frais supplémentaires. Offre limitée sur les commandes supérieures à 100 000 FCFA !",
+        "cta": "ACHETER MAINTENANT"
+      },
+      "gamingVsProductivity": {
+        "gamingTitle": "ZONE GAMING",
+        "gamingSubtitle": "Ordinateurs portables gaming haute performance, PC de bureau et accessoires pour une expérience gaming ultime",
+        "gamingCta": "EXPLORER LE GAMING",
+        "productivityTitle": "HUB PRODUCTIVITÉ",
+        "productivitySubtitle": "Stations de travail professionnelles, moniteurs et outils pour booster votre productivité",
+        "productivityCta": "EXPLORER LA PRODUCTIVITÉ"
+      },
+      "flashSale": {
+        "title": "MÉGA VENTE FLASH",
+        "subtitle": "Jusqu'à 50% DE RÉDUCTION sur une sélection d'équipements gaming. Ne manquez pas ça !",
+        "cta": "PROFITER DES OFFRES"
+      },
+      "tradeIn": {
+        "title": "ÉCHANGEZ VOTRE ANCIEN ÉQUIPEMENT",
+        "subtitle": "Passez à la dernière technologie et obtenez un crédit instantané pour vos anciens appareils. Transformez votre ancienne configuration gaming en votre nouveau setup de rêve !",
+        "cta": "COMMENCER L'ÉCHANGE"
+      }
     }
   },
   "products": {

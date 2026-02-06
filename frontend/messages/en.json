@@ -103,6 +103,31 @@
       "viewAll": "VIEW ALL PRODUCTS",
       "exploreDeals": "EXPLORE ALL DEALS",
       "seeNewArrivals": "SEE ALL NEW ARRIVALS"
+    },
+    "banners": {
+      "freeShipping": {
+        "title": "FREE SHIPPING ACROSS WEST AFRICA",
+        "subtitle": "Get your gaming gear delivered to your doorstep at no extra cost. Limited time offer on orders above 100,000 FCFA!",
+        "cta": "SHOP NOW"
+      },
+      "gamingVsProductivity": {
+        "gamingTitle": "GAMING ZONE",
+        "gamingSubtitle": "High-performance gaming laptops, desktops, and accessories for the ultimate gaming experience",
+        "gamingCta": "EXPLORE GAMING",
+        "productivityTitle": "PRODUCTIVITY HUB",
+        "productivitySubtitle": "Professional workstations, monitors, and tools to boost your productivity",
+        "productivityCta": "EXPLORE PRODUCTIVITY"
+      },
+      "flashSale": {
+        "title": "MEGA FLASH SALE",
+        "subtitle": "Up to 50% OFF on selected gaming gear. Don't miss out!",
+        "cta": "GRAB THE DEALS NOW"
+      },
+      "tradeIn": {
+        "title": "TRADE-IN YOUR OLD GEAR",
+        "subtitle": "Upgrade to the latest tech and get instant credit for your old devices. Turn your old gaming setup into your new dream rig!",
+        "cta": "START TRADE-IN"
+      }
     }
   },
   "products": {

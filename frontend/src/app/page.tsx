@@ -6,6 +6,7 @@ import { ProductGrid } from '@/components/products/product-grid'
 import { PromoBanner } from '@/components/home/promo-banner'
 import { SplitBanner } from '@/components/home/split-banner'
 import { CountdownBanner } from '@/components/home/countdown-banner'
+import { useLanguage } from '@/contexts/LanguageContext'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -18,6 +19,7 @@ export default function HomePage() {
   const [dealsProducts, setDealsProducts] = useState<Product[]>([]);
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
   
   const selectedCountry = useSelector((state: RootState) => state.country.selectedCountry);
   const countryCode = selectedCountry?.code || 'SN'; // Default to Senegal if no country selected
@@ -28,11 +30,12 @@ export default function HomePage() {
 
   const fetchHomePageData = async () => {
     try {
+      // Use Next.js API routes which proxy to backend using internal Docker network
       const [featured, trending, deals, arrivals] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/featured?limit=8`).then(r => r.json()),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/trending?limit=8`).then(r => r.json()),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/deals?limit=8`).then(r => r.json()),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/new-arrivals?limit=8`).then(r => r.json()),
+        fetch('/api/products/featured?limit=8').then(r => r.json()),
+        fetch('/api/products/trending?limit=8').then(r => r.json()),
+        fetch('/api/products/deals?limit=8').then(r => r.json()),
+        fetch('/api/products/new-arrivals?limit=8').then(r => r.json()),
       ]);
 
       setFeaturedProducts(featured);
@@ -63,26 +66,26 @@ export default function HomePage() {
             {/* Gaming title with neon effect */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-gaming font-bold mb-8 animate-fade-in">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 animate-neon-pulse">
-                LEVEL UP
+                {t('home.hero.title')}
               </span>
               <br />
               <span className="text-dark-800 font-tech text-4xl md:text-5xl lg:text-6xl">
-                YOUR TECH GAME
+                {t('home.hero.subtitle')}
               </span>
             </h1>
             
             <p className="text-xl md:text-2xl lg:text-3xl mb-12 text-dark-600 font-tech max-w-4xl mx-auto animate-slide-up">
-              Experience the <span className="text-neon-blue font-semibold">future of technology</span> with premium gaming gear and cutting-edge tech products across West Africa
+              {t('home.hero.description')}
             </p>
             
             {/* Gaming CTA buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12 animate-slide-up" style={{ animationDelay: '0.3s' }}>
               <CountrySelector />
               <Link href="/products" className="btn-neon text-lg px-8 py-4 font-tech">
-                EXPLORE ARSENAL
+                {t('home.hero.exploreArsenal')}
               </Link>
               <Link href="/categories/premium" className="btn-primary text-lg px-8 py-4 font-tech">
-                PREMIUM GAMING
+                {t('home.hero.premiumGaming')}
               </Link>
             </div>
 
@@ -90,19 +93,19 @@ export default function HomePage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto animate-fade-in" style={{ animationDelay: '0.6s' }}>
               <div className="card-gaming text-center">
                 <div className="text-3xl font-gaming font-bold text-primary-500 mb-2">1000+</div>
-                <div className="text-sm font-tech text-dark-600">Gaming Products</div>
+                <div className="text-sm font-tech text-dark-600">{t('home.stats.products')}</div>
               </div>
               <div className="card-gaming text-center">
                 <div className="text-3xl font-gaming font-bold text-secondary-500 mb-2">3</div>
-                <div className="text-sm font-tech text-dark-600">Countries Served</div>
+                <div className="text-sm font-tech text-dark-600">{t('home.stats.countries')}</div>
               </div>
               <div className="card-gaming text-center">
                 <div className="text-3xl font-gaming font-bold text-accent-500 mb-2">24/7</div>
-                <div className="text-sm font-tech text-dark-600">Gaming Support</div>
+                <div className="text-sm font-tech text-dark-600">{t('home.stats.support')}</div>
               </div>
               <div className="card-gaming text-center">
                 <div className="text-3xl font-gaming font-bold text-neon-blue mb-2">99%</div>
-                <div className="text-sm font-tech text-dark-600">Satisfaction Rate</div>
+                <div className="text-sm font-tech text-dark-600">{t('home.stats.satisfaction')}</div>
               </div>
             </div>
           </div>
@@ -123,11 +126,11 @@ export default function HomePage() {
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-gaming font-bold mb-6">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">
-                  FEATURED GEAR
+                  {t('home.sections.featured')}
                 </span>
               </h2>
               <p className="text-xl md:text-2xl text-dark-600 font-tech max-w-3xl mx-auto">
-                Handpicked premium products for the ultimate gaming experience
+                {t('home.sections.featuredDesc')}
               </p>
             </div>
             
@@ -135,7 +138,7 @@ export default function HomePage() {
             
             <div className="text-center mt-12">
               <Link href="/products" className="btn-primary text-lg px-8 py-4 font-tech inline-block">
-                VIEW ALL PRODUCTS
+                {t('home.buttons.viewAll')}
               </Link>
             </div>
           </div>
@@ -144,9 +147,9 @@ export default function HomePage() {
 
       {/* Promo Banner - Free Shipping */}
       <PromoBanner
-        title="FREE SHIPPING ACROSS WEST AFRICA"
-        subtitle="Get your gaming gear delivered to your doorstep at no extra cost. Limited time offer on orders above 100,000 FCFA!"
-        ctaText="SHOP NOW"
+        title={t('home.banners.freeShipping.title')}
+        subtitle={t('home.banners.freeShipping.subtitle')}
+        ctaText={t('home.banners.freeShipping.cta')}
         ctaLink="/products"
         variant="primary"
         icon={
@@ -165,15 +168,15 @@ export default function HomePage() {
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-block px-6 py-2 bg-accent-500 text-white font-gaming text-sm rounded-full mb-4 animate-pulse">
-                🔥 EPIC DEALS
+                {t('home.sections.dealsTag')}
               </div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-gaming font-bold mb-6">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-primary-400">
-                  LEGENDARY SAVINGS
+                  {t('home.sections.dealsTitle')}
                 </span>
               </h2>
               <p className="text-xl md:text-2xl text-dark-600 font-tech max-w-3xl mx-auto">
-                Premium refurbished gear at unbeatable prices. Quality guaranteed.
+                {t('home.sections.dealsDesc')}
               </p>
             </div>
             
@@ -181,7 +184,7 @@ export default function HomePage() {
             
             <div className="text-center mt-12">
               <Link href="/products?isRefurbished=true" className="btn-neon text-lg px-8 py-4 font-tech inline-block">
-                EXPLORE ALL DEALS
+                {t('home.buttons.exploreDeals')}
               </Link>
             </div>
           </div>
@@ -194,11 +197,11 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-gaming font-bold mb-6">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">
-                GAMING ARSENAL
+                {t('home.sections.categories')}
               </span>
             </h2>
             <p className="text-xl md:text-2xl text-dark-600 font-tech max-w-3xl mx-auto">
-              Choose your weapon. Dominate the battlefield. Experience gaming like never before.
+              {t('home.sections.categoriesDesc')}
             </p>
           </div>
           
@@ -208,14 +211,14 @@ export default function HomePage() {
 
       {/* Split Banner - Gaming vs Productivity */}
       <SplitBanner
-        leftTitle="GAMING ZONE"
-        leftSubtitle="High-performance gaming laptops, desktops, and accessories for the ultimate gaming experience"
-        leftCta="EXPLORE GAMING"
+        leftTitle={t('home.banners.gamingVsProductivity.gamingTitle')}
+        leftSubtitle={t('home.banners.gamingVsProductivity.gamingSubtitle')}
+        leftCta={t('home.banners.gamingVsProductivity.gamingCta')}
         leftLink="/categories/gaming"
         leftGradient="from-primary-600 to-secondary-600"
-        rightTitle="PRODUCTIVITY HUB"
-        rightSubtitle="Professional workstations, monitors, and tools to boost your productivity"
-        rightCta="EXPLORE PRODUCTIVITY"
+        rightTitle={t('home.banners.gamingVsProductivity.productivityTitle')}
+        rightSubtitle={t('home.banners.gamingVsProductivity.productivitySubtitle')}
+        rightCta={t('home.banners.gamingVsProductivity.productivityCta')}
         rightLink="/categories/productivity"
         rightGradient="from-accent-600 to-primary-600"
       />
@@ -228,15 +231,15 @@ export default function HomePage() {
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-block px-6 py-2 bg-primary-500 text-white font-gaming text-sm rounded-full mb-4">
-                📈 TRENDING NOW
+                {t('home.sections.trendingTag')}
               </div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-gaming font-bold mb-6">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
-                  WHAT GAMERS LOVE
+                  {t('home.sections.trendingTitle')}
                 </span>
               </h2>
               <p className="text-xl md:text-2xl text-dark-600 font-tech max-w-3xl mx-auto">
-                Most popular products flying off the shelves
+                {t('home.sections.trendingDesc')}
               </p>
             </div>
             
@@ -251,15 +254,15 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-block px-6 py-2 bg-secondary-500 text-white font-gaming text-sm rounded-full mb-4">
-                ✨ JUST DROPPED
+                {t('home.sections.newArrivalsTag')}
               </div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-gaming font-bold mb-6">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary-400 to-accent-400">
-                  NEW ARRIVALS
+                  {t('home.sections.newArrivalsTitle')}
                 </span>
               </h2>
               <p className="text-xl md:text-2xl text-dark-600 font-tech max-w-3xl mx-auto">
-                Fresh tech just landed. Be the first to level up.
+                {t('home.sections.newArrivalsDesc')}
               </p>
             </div>
             
@@ -267,7 +270,7 @@ export default function HomePage() {
             
             <div className="text-center mt-12">
               <Link href="/products?sortBy=createdAt&sortOrder=DESC" className="btn-primary text-lg px-8 py-4 font-tech inline-block">
-                SEE ALL NEW ARRIVALS
+                {t('home.buttons.seeNewArrivals')}
               </Link>
             </div>
           </div>
@@ -276,10 +279,10 @@ export default function HomePage() {
 
       {/* Countdown Banner - Flash Sale */}
       <CountdownBanner
-        title="MEGA FLASH SALE"
-        subtitle="Up to 50% OFF on selected gaming gear. Don't miss out!"
+        title={t('home.banners.flashSale.title')}
+        subtitle={t('home.banners.flashSale.subtitle')}
         endDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)} // 7 days from now
-        ctaText="GRAB THE DEALS NOW"
+        ctaText={t('home.banners.flashSale.cta')}
         ctaLink="/products?isRefurbished=true"
       />
 
@@ -290,11 +293,11 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-gaming font-bold mb-6">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
-                WHY CHOOSE US
+                {t('home.features.title')}
               </span>
             </h2>
             <p className="text-xl text-dark-600 font-tech max-w-3xl mx-auto">
-              The ultimate gaming destination in West Africa
+              {t('home.features.subtitle')}
             </p>
           </div>
 
@@ -309,8 +312,8 @@ export default function HomePage() {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               </div>
-              <h3 className="text-2xl font-gaming font-bold mb-4 text-dark-800">INSTANT PAYMENT</h3>
-              <p className="text-dark-600 font-tech">Lightning-fast transactions with Orange Money, Wave, Moov, and international cards</p>
+              <h3 className="text-2xl font-gaming font-bold mb-4 text-dark-800">{t('home.features.payment.title')}</h3>
+              <p className="text-dark-600 font-tech">{t('home.features.payment.desc')}</p>
             </div>
 
             {/* Delivery Feature */}
@@ -323,8 +326,8 @@ export default function HomePage() {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               </div>
-              <h3 className="text-2xl font-gaming font-bold mb-4 text-dark-800">WARP SPEED DELIVERY</h3>
-              <p className="text-dark-600 font-tech">Ultra-fast delivery across West Africa with real-time tracking and secure packaging</p>
+              <h3 className="text-2xl font-gaming font-bold mb-4 text-dark-800">{t('home.features.delivery.title')}</h3>
+              <p className="text-dark-600 font-tech">{t('home.features.delivery.desc')}</p>
             </div>
 
             {/* Quality Feature */}
@@ -337,8 +340,8 @@ export default function HomePage() {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-accent-500 to-accent-600 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               </div>
-              <h3 className="text-2xl font-gaming font-bold mb-4 text-dark-800">LEGENDARY QUALITY</h3>
-              <p className="text-dark-600 font-tech">Premium new and certified refurbished products with extended warranty protection</p>
+              <h3 className="text-2xl font-gaming font-bold mb-4 text-dark-800">{t('home.features.quality.title')}</h3>
+              <p className="text-dark-600 font-tech">{t('home.features.quality.desc')}</p>
             </div>
           </div>
         </div>
@@ -346,9 +349,9 @@ export default function HomePage() {
 
       {/* Promo Banner - Trade-In Program */}
       <PromoBanner
-        title="TRADE-IN YOUR OLD GEAR"
-        subtitle="Upgrade to the latest tech and get instant credit for your old devices. Turn your old gaming setup into your new dream rig!"
-        ctaText="START TRADE-IN"
+        title={t('home.banners.tradeIn.title')}
+        subtitle={t('home.banners.tradeIn.subtitle')}
+        ctaText={t('home.banners.tradeIn.cta')}
         ctaLink="/support"
         variant="accent"
         icon={
@@ -365,11 +368,11 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-gaming font-bold mb-6">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
-                GAMERS SPEAK
+                {t('home.testimonials.title')}
               </span>
             </h2>
             <p className="text-xl text-dark-600 font-tech max-w-3xl mx-auto">
-              Join thousands of satisfied gamers across West Africa
+              {t('home.testimonials.subtitle')}
             </p>
           </div>
 
@@ -382,8 +385,8 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-dark-600 font-tech mb-4">"Best gaming store in Senegal! Fast delivery and authentic products. My RTX 4090 arrived in perfect condition."</p>
-              <p className="font-gaming text-primary-500">- Amadou K., Dakar</p>
+              <p className="text-dark-600 font-tech mb-4">{t('home.testimonials.review1')}</p>
+              <p className="font-gaming text-primary-500">{t('home.testimonials.customer1')}</p>
             </div>
 
             <div className="card-gaming p-8">
@@ -394,8 +397,8 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-dark-600 font-tech mb-4">"Amazing refurbished laptops! Got a Grade A MacBook Pro at 40% off. Works like new and came with warranty."</p>
-              <p className="font-gaming text-primary-500">- Fatou D., Abidjan</p>
+              <p className="text-dark-600 font-tech mb-4">{t('home.testimonials.review2')}</p>
+              <p className="font-gaming text-primary-500">{t('home.testimonials.customer2')}</p>
             </div>
 
             <div className="card-gaming p-8">
@@ -406,8 +409,8 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-dark-600 font-tech mb-4">"Customer support is incredible! They helped me choose the perfect gaming setup for my budget. Highly recommend!"</p>
-              <p className="font-gaming text-primary-500">- Ibrahim M., Bamako</p>
+              <p className="text-dark-600 font-tech mb-4">{t('home.testimonials.review3')}</p>
+              <p className="font-gaming text-primary-500">{t('home.testimonials.customer3')}</p>
             </div>
           </div>
         </div>
@@ -419,18 +422,18 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl md:text-5xl font-gaming font-bold mb-8">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
-              READY TO DOMINATE?
+              {t('home.cta.title')}
             </span>
           </h2>
           <p className="text-xl md:text-2xl text-dark-600 font-tech mb-12 max-w-3xl mx-auto">
-            Join thousands of gamers across West Africa who've upgraded their setup with WestTech Gaming
+            {t('home.cta.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Link href="/products" className="btn-primary text-xl px-10 py-5 font-tech">
-              START SHOPPING
+              {t('home.cta.startShopping')}
             </Link>
             <Link href="/support" className="btn-neon text-xl px-10 py-5 font-tech">
-              GET SUPPORT
+              {t('home.cta.getSupport')}
             </Link>
           </div>
         </div>
