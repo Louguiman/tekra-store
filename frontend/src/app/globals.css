@@ -81,10 +81,18 @@
     content: '';
     @apply absolute inset-0 bg-gradient-to-br rounded-xl;
     background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.05), rgba(217, 70, 239, 0.05));
+    pointer-events: none; /* Allow clicks to pass through to inputs */
+    z-index: 0;
   }
   
   .card-gaming:hover::before {
     background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.1), rgba(217, 70, 239, 0.1));
+  }
+  
+  /* Ensure form elements are above the ::before pseudo-element */
+  .card-gaming > * {
+    position: relative;
+    z-index: 1;
   }
   
   /* Input fields */
