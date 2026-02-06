@@ -21,10 +21,43 @@ async function bootstrap() {
     }),
   );
 
-  // Enable CORS for frontend
+  // Enable CORS for frontend - Allow all localhost origins for development
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://localhost',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3002',
+    'http://127.0.0.1',
+  ];
+
+  // Add FRONTEND_URL from environment if set
+  if (process.env.FRONTEND_URL) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+  }
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      
+      // Allow all localhost origins in development
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+      
+      // Check against allowed origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Reject other origins
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
 
   // Global validation pipe
