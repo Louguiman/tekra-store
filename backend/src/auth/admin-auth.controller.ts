@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
+import { Public } from './decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UserRole } from '../entities/user.entity';
@@ -19,6 +20,7 @@ import { UserRole } from '../entities/user.entity';
 export class AdminAuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('login')
   async adminLogin(@Body() loginDto: LoginDto) {
     const result = await this.authService.login(loginDto);
@@ -31,6 +33,7 @@ export class AdminAuthController {
     return result;
   }
 
+  @Public()
   @Post('refresh')
   async adminRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     const result = await this.authService.refreshToken(refreshTokenDto.refreshToken);
