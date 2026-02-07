@@ -48,10 +48,14 @@ export class ProductsService {
       throw new NotFoundException(`Category with ID ${categoryId} not found`);
     }
 
-    // Validate segment exists
-    const segment = await this.segmentRepository.findOne({ where: { id: segmentId } });
+    // Validate segment exists - segmentId can be either UUID or segment name
+    let segment = await this.segmentRepository.findOne({ where: { id: segmentId } });
     if (!segment) {
-      throw new NotFoundException(`Segment with ID ${segmentId} not found`);
+      // Try to find by name if not found by ID
+      segment = await this.segmentRepository.findOne({ where: { name: segmentId as any } });
+      if (!segment) {
+        throw new NotFoundException(`Segment with ID or name ${segmentId} not found`);
+      }
     }
 
     // Validate refurbished grade logic
@@ -154,9 +158,13 @@ export class ProductsService {
 
     // Update segment if provided
     if (segmentId) {
-      const segment = await this.segmentRepository.findOne({ where: { id: segmentId } });
+      let segment = await this.segmentRepository.findOne({ where: { id: segmentId } });
       if (!segment) {
-        throw new NotFoundException(`Segment with ID ${segmentId} not found`);
+        // Try to find by name if not found by ID
+        segment = await this.segmentRepository.findOne({ where: { name: segmentId as any } });
+        if (!segment) {
+          throw new NotFoundException(`Segment with ID or name ${segmentId} not found`);
+        }
       }
       product.segment = segment;
     }
