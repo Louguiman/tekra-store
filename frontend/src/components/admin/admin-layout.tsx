@@ -46,8 +46,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-dark-50">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
       </div>
     )
   }
@@ -57,70 +57,71 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-dark-50">
       {/* Navigation Header */}
-      <nav className="bg-white shadow-sm border-b">
+      <nav className="bg-dark-100 bg-opacity-80 backdrop-blur-md shadow-lg border-b border-primary-500 border-opacity-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <Link href="/admin" className="text-xl font-bold text-gray-900">
-                  Admin Dashboard
+                <Link href="/admin" className="text-xl font-gaming font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
+                  ADMIN DASHBOARD
                 </Link>
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-4">
                 <Link
                   href="/admin"
-                  className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                  className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/admin/users"
-                  className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                  className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
                 >
                   Users
                 </Link>
                 <Link
                   href="/admin/products"
-                  className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                  className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
                 >
                   Products
                 </Link>
                 <Link
                   href="/admin/orders"
-                  className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                  className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
                 >
                   Orders
                 </Link>
                 <Link
                   href="/admin/inventory"
-                  className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                  className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
                 >
                   Inventory
                 </Link>
                 <Link
                   href="/admin/validations"
-                  className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                  className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
                 >
                   Validations
                 </Link>
                 <Link
                   href="/admin/analytics"
-                  className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                  className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
                 >
                   Analytics
                 </Link>
               </div>
             </div>
             <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <span className="text-sm text-gray-700 mr-4">
-                  Welcome, {user?.fullName}
+              <div className="flex-shrink-0 flex items-center space-x-4">
+                <span className="text-sm text-dark-700 font-tech">
+                  Welcome, <span className="text-primary-400 font-semibold">{user?.fullName}</span>
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg text-sm font-tech font-medium transition-all duration-300 hover:shadow-lg"
+                  style={{ boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)' }}
                 >
                   Logout
                 </button>

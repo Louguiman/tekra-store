@@ -66,7 +66,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false, // Allow extra properties to be stripped instead of throwing errors
       transform: true,
     }),
   );

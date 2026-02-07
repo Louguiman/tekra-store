@@ -198,48 +198,48 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      <div className="bg-white shadow rounded-lg">
+      <div className="card-gaming">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Basic Information
+          <h3 className="text-lg leading-6 font-gaming font-bold text-primary-400 mb-4">
+            BASIC INFORMATION
           </h3>
           
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-tech font-medium text-dark-700 mb-2">
                 Product Name *
               </label>
               <input
                 type="text"
                 id="name"
                 {...register('name', { required: 'Product name is required' })}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="input-field"
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                <p className="mt-1 text-sm text-red-400 font-tech">{errors.name.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="brand" className="block text-sm font-tech font-medium text-dark-700 mb-2">
                 Brand
               </label>
               <input
                 type="text"
                 id="brand"
                 {...register('brand')}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="input-field"
               />
             </div>
 
             <div>
-              <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="categoryId" className="block text-sm font-tech font-medium text-dark-700 mb-2">
                 Category *
               </label>
               <select
                 id="categoryId"
                 {...register('categoryId', { required: 'Category is required' })}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="input-field"
               >
                 <option value="">Select a category</option>
                 {categories?.map(category => (
@@ -249,18 +249,18 @@ export default function ProductForm({ product }: ProductFormProps) {
                 ))}
               </select>
               {errors.categoryId && (
-                <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>
+                <p className="mt-1 text-sm text-red-400 font-tech">{errors.categoryId.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="segmentId" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="segmentId" className="block text-sm font-tech font-medium text-dark-700 mb-2">
                 Product Segment *
               </label>
               <select
                 id="segmentId"
                 {...register('segmentId', { required: 'Product segment is required' })}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="input-field"
               >
                 <option value="">Select a segment</option>
                 {segments?.map(segment => (
@@ -270,12 +270,12 @@ export default function ProductForm({ product }: ProductFormProps) {
                 ))}
               </select>
               {errors.segmentId && (
-                <p className="mt-1 text-sm text-red-600">{errors.segmentId.message}</p>
+                <p className="mt-1 text-sm text-red-400 font-tech">{errors.segmentId.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="warrantyMonths" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="warrantyMonths" className="block text-sm font-tech font-medium text-dark-700 mb-2">
                 Warranty (months)
               </label>
               <input
@@ -288,10 +288,10 @@ export default function ProductForm({ product }: ProductFormProps) {
                   min: { value: 0, message: 'Warranty cannot be negative' },
                   max: { value: 120, message: 'Warranty cannot exceed 120 months' }
                 })}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="input-field"
               />
               {errors.warrantyMonths && (
-                <p className="mt-1 text-sm text-red-600">{errors.warrantyMonths.message}</p>
+                <p className="mt-1 text-sm text-red-400 font-tech">{errors.warrantyMonths.message}</p>
               )}
             </div>
 
@@ -301,9 +301,9 @@ export default function ProductForm({ product }: ProductFormProps) {
                   id="isRefurbished"
                   type="checkbox"
                   {...register('isRefurbished')}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-dark-300 rounded"
                 />
-                <label htmlFor="isRefurbished" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="isRefurbished" className="ml-2 block text-sm text-dark-700 font-tech">
                   This is a refurbished product
                 </label>
               </div>
@@ -321,14 +321,14 @@ export default function ProductForm({ product }: ProductFormProps) {
           </div>
 
           <div className="mt-6">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="description" className="block text-sm font-tech font-medium text-dark-700 mb-2">
               Description
             </label>
             <textarea
               id="description"
               rows={4}
               {...register('description')}
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="input-field"
               placeholder="Detailed product description..."
             />
           </div>
@@ -336,10 +336,10 @@ export default function ProductForm({ product }: ProductFormProps) {
       </div>
 
       {/* Product Images */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="card-gaming">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Product Images
+          <h3 className="text-lg leading-6 font-gaming font-bold text-primary-400 mb-4">
+            PRODUCT IMAGES
           </h3>
           
           <ImageUpload
@@ -352,18 +352,18 @@ export default function ProductForm({ product }: ProductFormProps) {
       </div>
 
       {/* Specifications */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="card-gaming">
         <div className="px-4 py-5 sm:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Specifications
+            <h3 className="text-lg leading-6 font-gaming font-bold text-primary-400">
+              SPECIFICATIONS
             </h3>
             <button
               type="button"
               onClick={() => appendSpec({ name: '', value: '', sortOrder: specFields.length })}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+              className="bg-primary-600 hover:bg-primary-500 text-white px-3 py-1 rounded-lg text-sm font-tech transition-all duration-300"
             >
-              Add Specification
+              + Add Specification
             </button>
           </div>
 
@@ -375,7 +375,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                     type="text"
                     placeholder="Specification name"
                     {...register(`specifications.${index}.name`)}
-                    className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="input-field"
                   />
                 </div>
                 <div>
@@ -383,7 +383,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                     type="text"
                     placeholder="Value"
                     {...register(`specifications.${index}.value`)}
-                    className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="input-field"
                   />
                 </div>
                 <div className="flex items-center space-x-2">
@@ -391,12 +391,12 @@ export default function ProductForm({ product }: ProductFormProps) {
                     type="number"
                     placeholder="Sort order"
                     {...register(`specifications.${index}.sortOrder`, { valueAsNumber: true })}
-                    className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="input-field"
                   />
                   <button
                     type="button"
                     onClick={() => removeSpec(index)}
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-400 hover:text-red-300 font-tech transition-colors duration-200"
                   >
                     Remove
                   </button>
@@ -408,10 +408,10 @@ export default function ProductForm({ product }: ProductFormProps) {
       </div>
 
       {/* Pricing */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="card-gaming">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Pricing by Country
+          <h3 className="text-lg leading-6 font-gaming font-bold text-primary-400 mb-4">
+            PRICING BY COUNTRY
           </h3>
 
           <div className="space-y-4">
@@ -420,12 +420,12 @@ export default function ProductForm({ product }: ProductFormProps) {
               return (
                 <div key={field.id} className="grid grid-cols-1 gap-4 sm:grid-cols-4 items-center">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-tech font-medium text-dark-700">
                       {country?.name || 'Country'}
                     </label>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Regular Price (FCFA)</label>
+                    <label className="block text-xs text-dark-600 font-tech mb-1">Regular Price (FCFA)</label>
                     <input
                       type="number"
                       min="0"
@@ -435,14 +435,14 @@ export default function ProductForm({ product }: ProductFormProps) {
                         valueAsNumber: true,
                         min: { value: 0, message: 'Price cannot be negative' }
                       })}
-                      className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="input-field"
                     />
                     {errors.prices?.[index]?.price && (
-                      <p className="mt-1 text-xs text-red-600">{errors.prices[index]?.price?.message}</p>
+                      <p className="mt-1 text-xs text-red-400 font-tech">{errors.prices[index]?.price?.message}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Promo Price (FCFA)</label>
+                    <label className="block text-xs text-dark-600 font-tech mb-1">Promo Price (FCFA)</label>
                     <input
                       type="number"
                       min="0"
@@ -451,7 +451,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                         valueAsNumber: true,
                         min: { value: 0, message: 'Promo price cannot be negative' }
                       })}
-                      className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="input-field"
                     />
                   </div>
                   <div>
@@ -459,7 +459,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                       <button
                         type="button"
                         onClick={() => removePrice(index)}
-                        className="text-red-600 hover:text-red-800 text-sm"
+                        className="text-red-400 hover:text-red-300 text-sm font-tech transition-colors duration-200"
                       >
                         Remove
                       </button>
@@ -477,14 +477,14 @@ export default function ProductForm({ product }: ProductFormProps) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="btn-secondary font-tech"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          className="btn-primary font-tech disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
         </button>
