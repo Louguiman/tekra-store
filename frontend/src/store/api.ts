@@ -346,6 +346,11 @@ export const api = createApi({
     }),
     getProductSegments: builder.query<ProductSegment[], void>({
       query: () => '/product-segments',
+      transformResponse: (response: any[]) => {
+        // Backend returns ProductSegmentEntity[] with {id, name, description}
+        // We only need the name values
+        return response.map(segment => segment.name);
+      },
       providesTags: ['Product'],
     }),
 
