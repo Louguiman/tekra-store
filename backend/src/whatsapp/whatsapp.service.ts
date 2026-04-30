@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SupplierSubmission } from '../entities/supplier-submission.entity';
@@ -61,6 +61,8 @@ export interface ProcessingResult {
 
 @Injectable()
 export class WhatsappService {
+  private readonly logger = new Logger(WhatsappService.name);
+
   constructor(
     @InjectRepository(SupplierSubmission)
     private submissionRepository: Repository<SupplierSubmission>,
@@ -78,11 +80,13 @@ export class WhatsappService {
   validateWebhookSignature(signature: string, payload: string): boolean {
     const webhookSecret = process.env.WHATSAPP_WEBHOOK_SECRET;
     if (!webhookSecret) {
+      this.logger.error('[SIGNATURE] WHATSAPP_WEBHOOK_SECRET is not configured');
       throw new Error('WHATSAPP_WEBHOOK_SECRET not configured');
     }
 
     // Ensure signature is provided
     if (!signature) {
+      this.logger.warn('[SIGNATURE] No signature provided in request');
       return false;
     }
 
@@ -95,12 +99,14 @@ export class WhatsappService {
       const providedSignature = signature.replace('sha256=', '');
       
       // Use timing-safe comparison to prevent timing attacks
-      return crypto.timingSafeEqual(
+      const valid = crypto.timingSafeEqual(
         Buffer.from(expectedSignature, 'hex'),
         Buffer.from(providedSignature, 'hex')
       );
+      this.logger.log(`[SIGNATURE] Validation result: ${valid ? 'VALID' : 'INVALID'}`);
+      return valid;
     } catch (error) {
-      console.error('Signature validation error:', error.message);
+      this.logger.error(`[SIGNATURE] Validation error: ${error.message}`);
       return false;
     }
   }
@@ -109,9 +115,12 @@ export class WhatsappService {
     const startTime = Date.now();
     
     try {
+      this.logger.log(`[MSG] processIncomingMessage — entries: ${payload.entry?.length ?? 0}`);
+
       // Extract message from payload
       const message = this.extractMessageFromPayload(payload);
       if (!message) {
+        this.logger.warn('[MSG] No valid message found in payload');
         return {
           processed: false,
           processingTime: Date.now() - startTime,
@@ -120,9 +129,13 @@ export class WhatsappService {
         };
       }
 
+      this.logger.log(`[MSG] Message extracted — id: ${message.id}, from: ${message.from}, type: ${message.type}`);
+
       // Enhanced supplier authentication (Requirements 5.1, 5.3)
+      this.logger.log(`[AUTH] Authenticating supplier for phone: ${message.from}`);
       const supplier = await this.authenticateSupplier(message.from);
       if (!supplier) {
+        this.logger.warn(`[AUTH] Supplier authentication FAILED for phone: ${message.from}`);
         await this.auditService.logAction({
           action: AuditAction.ACCESS_DENIED,
           resource: AuditResource.SUPPLIER,
@@ -138,15 +151,21 @@ export class WhatsappService {
         };
       }
 
+      this.logger.log(`[AUTH] Supplier authenticated — id: ${supplier.id}, name: ${supplier.name}`);
+
       // Check for message grouping (Requirement 1.5)
       const messageTimestamp = new Date(parseInt(message.timestamp) * 1000);
+      this.logger.log(`[GROUP] Checking message grouping for supplier ${supplier.id} at ${messageTimestamp.toISOString()}`);
       const existingGroup = await this.messageGroupingService.shouldGroupWithExisting(
         supplier.id, 
         messageTimestamp
       );
+      this.logger.log(`[GROUP] Grouping result — grouped with: ${existingGroup?.id ?? 'none (new group)'}`);
 
       // Create submission record
+      this.logger.log(`[SUBMISSION] Creating submission record — type: ${message.type}`);
       const submission = await this.createSubmission(supplier.id, message);
+      this.logger.log(`[SUBMISSION] Submission created — id: ${submission.id}, contentType: ${submission.contentType}, hasMedia: ${!!submission.mediaUrl}`);
 
       // Log processing start
       await this.logProcessingStage(submission.id, 'webhook', 'started', Date.now() - startTime, null, {
@@ -177,14 +196,18 @@ export class WhatsappService {
       // Log processing completion
       await this.logProcessingStage(submission.id, 'webhook', 'completed', Date.now() - startTime);
 
+      const processingTime = Date.now() - startTime;
+      this.logger.log(`[MSG] processIncomingMessage DONE — submissionId: ${submission.id}, processingTime: ${processingTime}ms`);
+
       return {
         processed: true,
         submissionId: submission.id,
-        processingTime: Date.now() - startTime,
+        processingTime,
         supplierAuthenticated: true,
       };
 
     } catch (error) {
+      this.logger.error(`[MSG] processIncomingMessage ERROR: ${error.message}`, error.stack);
       await this.auditService.logAction({
         action: AuditAction.SUPPLIER_SUBMISSION,
         resource: AuditResource.SUPPLIER_SUBMISSION,
@@ -291,6 +314,8 @@ export class WhatsappService {
       return null;
     }
 
+    this.logger.log(`[MEDIA] Downloading media — id: ${mediaId}, type: ${message.type}`);
+
     try {
       // Use retry logic for media download (Requirement 10.1)
       const result = await this.errorRecoveryService.executeWithRetry(
@@ -303,10 +328,12 @@ export class WhatsappService {
         throw new Error(`Media download failed after ${result.attempts} attempts`);
       }
 
+      this.logger.log(`[MEDIA] Download OK — id: ${mediaId}, localPath: ${result.result.localPath}, size: ${result.result.size} bytes, attempts: ${result.attempts}`);
+
       // Return the local file path for storage in the database
       return result.result.localPath;
     } catch (error) {
-      console.error(`Failed to download media ${mediaId}:`, error.message);
+      this.logger.error(`[MEDIA] Download FAILED — id: ${mediaId}: ${error.message}`);
       
       // Record critical error for monitoring (Requirement 10.4)
       await this.healthMonitoringService.recordCriticalError(
@@ -465,10 +492,12 @@ export class WhatsappService {
     }
 
     if (submission.processingStatus !== 'pending') {
+      this.logger.warn(`[AI] Submission ${submissionId} is not pending (status: ${submission.processingStatus}) — skipping`);
       throw new Error(`Submission ${submissionId} is not in pending status`);
     }
 
     const startTime = Date.now();
+    this.logger.log(`[AI] Starting AI processing — submissionId: ${submissionId}, contentType: ${submission.contentType}, supplier: ${submission.supplier.name}`);
 
     try {
       // Use transaction for database operations (Requirement 10.3)
@@ -477,6 +506,7 @@ export class WhatsappService {
           // Update status to processing
           submission.processingStatus = 'processing';
           await queryRunner.manager.save(submission);
+          this.logger.log(`[AI] Status set to 'processing' — submissionId: ${submissionId}`);
 
           // Log AI processing start
           await this.logProcessingStage(submissionId, 'ai_extraction', 'started', 0);
@@ -484,6 +514,7 @@ export class WhatsappService {
           let extractedProducts = [];
 
           // Process based on content type with retry logic (Requirement 10.1)
+          this.logger.log(`[AI] Dispatching to AI extractor — contentType: ${submission.contentType}`);
           const result = await this.errorRecoveryService.executeWithRetry(
             async () => {
               switch (submission.contentType) {
@@ -522,19 +553,24 @@ export class WhatsappService {
 
           extractedProducts = result.result || [];
 
+          const avgConfidence = extractedProducts.length > 0
+            ? extractedProducts.reduce((sum, p) => sum + p.confidenceScore, 0) / extractedProducts.length
+            : 0;
+
+          this.logger.log(`[AI] Extraction complete — submissionId: ${submissionId}, products: ${extractedProducts.length}, avgConfidence: ${(avgConfidence * 100).toFixed(1)}%, attempts: ${result.attempts}`);
+
           // Store extracted data
           submission.extractedData = extractedProducts;
           submission.processingStatus = 'completed';
           await queryRunner.manager.save(submission);
 
           const processingTime = Date.now() - startTime;
+          this.logger.log(`[AI] Submission saved as 'completed' — submissionId: ${submissionId}, processingTime: ${processingTime}ms`);
 
           // Log successful AI processing
           await this.logProcessingStage(submissionId, 'ai_extraction', 'completed', processingTime, null, {
             extractedProductsCount: extractedProducts.length,
-            averageConfidence: extractedProducts.length > 0 
-              ? extractedProducts.reduce((sum, p) => sum + p.confidenceScore, 0) / extractedProducts.length 
-              : 0,
+            averageConfidence: avgConfidence,
             retryAttempts: result.attempts - 1,
           });
 
@@ -557,6 +593,8 @@ export class WhatsappService {
       );
 
     } catch (error) {
+      this.logger.error(`[AI] Processing FAILED — submissionId: ${submissionId}: ${error.message}`, error.stack);
+
       // Update status to failed
       submission.processingStatus = 'failed';
       await this.submissionRepository.save(submission);
@@ -608,10 +646,12 @@ export class WhatsappService {
   }
 
   async initializeAIProcessing(): Promise<void> {
+    this.logger.log('[INIT] Initializing AI processing / Ollama connection');
     try {
       await this.aiProcessingService.initializeLocalModel();
+      this.logger.log('[INIT] AI processing initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize AI processing:', error.message);
+      this.logger.error(`[INIT] Failed to initialize AI processing: ${error.message}`);
       // Don't throw error as the service can still work with rule-based extraction
     }
   }

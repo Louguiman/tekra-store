@@ -77,18 +77,22 @@ export class AIProcessingService {
 
   async processTextMessage(content: string, supplier: Supplier): Promise<ExtractedProduct[]> {
     const startTime = Date.now();
+    this.logger.log(`[AI-TEXT] Processing text message — supplier: ${supplier.name}, contentLength: ${content.length} chars`);
     
     try {
       // First try rule-based extraction
       const ruleBasedResults = this.extractWithRules(content);
+      this.logger.log(`[AI-TEXT] Rule-based extraction — found ${ruleBasedResults.length} product(s)`);
       
       // Enhance with LLM if enabled and available
       let finalResults = ruleBasedResults;
       if (this.aiProcessingEnabled && ruleBasedResults.length > 0) {
+        this.logger.log(`[AI-TEXT] Enhancing with LLM (${this.ollamaModel}) — ${ruleBasedResults.length} product(s) to enhance`);
         try {
           finalResults = await this.enhanceWithLLM(ruleBasedResults, content);
+          this.logger.log(`[AI-TEXT] LLM enhancement OK — ${finalResults.length} product(s) returned`);
         } catch (error) {
-          this.logger.warn('LLM enhancement failed, using rule-based results:', error.message);
+          this.logger.warn(`[AI-TEXT] LLM enhancement FAILED, using rule-based results: ${error.message}`);
           finalResults = ruleBasedResults.map(result => ({
             ...result,
             extractionMetadata: {
@@ -97,9 +101,13 @@ export class AIProcessingService {
             },
           }));
         }
+      } else if (!this.aiProcessingEnabled) {
+        this.logger.log(`[AI-TEXT] AI processing disabled — using rule-based results only`);
       }
 
       const processingTime = Date.now() - startTime;
+      this.logger.log(`[AI-TEXT] Done — ${finalResults.length} product(s), processingTime: ${processingTime}ms`);
+
       return finalResults.map(result => ({
         ...result,
         extractionMetadata: {
@@ -109,7 +117,7 @@ export class AIProcessingService {
         },
       }));
     } catch (error) {
-      this.logger.error('Text processing failed:', error.message);
+      this.logger.error(`[AI-TEXT] Text processing FAILED: ${error.message}`);
       return [];
     }
   }
@@ -118,24 +126,26 @@ export class AIProcessingService {
     const startTime = Date.now();
     
     try {
-      this.logger.log(`Processing image: ${imageUrl}`);
+      this.logger.log(`[AI-IMAGE] Starting OCR — url: ${imageUrl}, supplier: ${supplier.name}`);
       
       // Use Tesseract.js for OCR
       const { data: { text } } = await Tesseract.recognize(imageUrl, 'eng', {
-        logger: m => this.logger.debug(`OCR: ${m.status} - ${m.progress}`),
+        logger: m => this.logger.debug(`[AI-IMAGE][OCR] ${m.status} — ${(m.progress * 100).toFixed(0)}%`),
       });
 
       if (!text.trim()) {
-        this.logger.warn('No text extracted from image');
+        this.logger.warn(`[AI-IMAGE] No text extracted from image: ${imageUrl}`);
         return [];
       }
 
-      this.logger.log(`Extracted text from image: ${text.substring(0, 100)}...`);
+      this.logger.log(`[AI-IMAGE] OCR complete — extracted ${text.length} chars: "${text.substring(0, 80)}..."`);
       
       // Process the extracted text
       const results = await this.processTextMessage(text, supplier);
       
       const processingTime = Date.now() - startTime;
+      this.logger.log(`[AI-IMAGE] Done — ${results.length} product(s), processingTime: ${processingTime}ms`);
+
       return results.map(result => ({
         ...result,
         extractionMetadata: {
@@ -145,7 +155,7 @@ export class AIProcessingService {
         },
       }));
     } catch (error) {
-      this.logger.error('Image processing failed:', error.message);
+      this.logger.error(`[AI-IMAGE] Image processing FAILED: ${error.message}`);
       return [];
     }
   }
@@ -154,23 +164,27 @@ export class AIProcessingService {
     const startTime = Date.now();
     
     try {
-      this.logger.log(`Processing PDF: ${pdfUrl}`);
+      this.logger.log(`[AI-PDF] Starting PDF parsing — url: ${pdfUrl}, supplier: ${supplier.name}`);
       
       // Read PDF file
       const pdfBuffer = fs.readFileSync(pdfUrl);
+      this.logger.log(`[AI-PDF] PDF loaded — size: ${pdfBuffer.length} bytes`);
+
       const pdfData = await pdfParse(pdfBuffer);
       
       if (!pdfData.text.trim()) {
-        this.logger.warn('No text extracted from PDF');
+        this.logger.warn(`[AI-PDF] No text extracted from PDF: ${pdfUrl}`);
         return [];
       }
 
-      this.logger.log(`Extracted text from PDF: ${pdfData.text.substring(0, 100)}...`);
+      this.logger.log(`[AI-PDF] PDF parsed — pages: ${pdfData.numpages}, extracted ${pdfData.text.length} chars: "${pdfData.text.substring(0, 80)}..."`);
       
       // Process the extracted text
       const results = await this.processTextMessage(pdfData.text, supplier);
       
       const processingTime = Date.now() - startTime;
+      this.logger.log(`[AI-PDF] Done — ${results.length} product(s), processingTime: ${processingTime}ms`);
+
       return results.map(result => ({
         ...result,
         extractionMetadata: {
@@ -180,7 +194,7 @@ export class AIProcessingService {
         },
       }));
     } catch (error) {
-      this.logger.error('PDF processing failed:', error.message);
+      this.logger.error(`[AI-PDF] PDF processing FAILED: ${error.message}`);
       return [];
     }
   }
@@ -191,6 +205,7 @@ export class AIProcessingService {
 
   async enhanceWithLLM(ruleBasedExtraction: ExtractedProduct[], originalText: string): Promise<ExtractedProduct[]> {
     try {
+      this.logger.log(`[LLM] Sending request to Ollama — model: ${this.ollamaModel}, url: ${this.ollamaBaseUrl}`);
       const prompt = this.buildExtractionPrompt(originalText, ruleBasedExtraction);
       
       const response = await axios.post(`${this.ollamaBaseUrl}/api/generate`, {
@@ -203,9 +218,13 @@ export class AIProcessingService {
         },
       });
 
+      this.logger.log(`[LLM] Response received — model: ${response.data.model}, eval_count: ${response.data.eval_count ?? 'N/A'}`);
+
       const llmResponse = response.data.response;
       const enhancedProducts = this.parseLLMResponse(llmResponse, ruleBasedExtraction);
       
+      this.logger.log(`[LLM] Parsed ${enhancedProducts.length} product(s) from LLM response`);
+
       return enhancedProducts.map(product => ({
         ...product,
         extractionMetadata: {
@@ -215,7 +234,7 @@ export class AIProcessingService {
         },
       }));
     } catch (error) {
-      this.logger.error('LLM enhancement failed:', error.message);
+      this.logger.error(`[LLM] LLM enhancement FAILED: ${error.message}`);
       throw error;
     }
   }

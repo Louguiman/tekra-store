@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import { SupplierSubmission } from '../entities/supplier-submission.entity';
@@ -14,6 +14,7 @@ export interface MessageGroup {
 
 @Injectable()
 export class MessageGroupingService {
+  private readonly logger = new Logger(MessageGroupingService.name);
   private readonly groupingWindowMs = 5 * 60 * 1000; // 5 minutes grouping window
 
   constructor(
@@ -25,6 +26,8 @@ export class MessageGroupingService {
     // Find the most recent submission from this supplier within the grouping window
     const cutoffTime = new Date(messageTimestamp.getTime() - this.groupingWindowMs);
     
+    this.logger.log(`[GROUPING] Checking grouping for supplier ${supplierId} — window: ${cutoffTime.toISOString()} → ${messageTimestamp.toISOString()}`);
+
     const recentSubmission = await this.submissionRepository.findOne({
       where: {
         supplier: { id: supplierId },
@@ -34,6 +37,12 @@ export class MessageGroupingService {
       relations: ['supplier'],
       order: { createdAt: 'DESC' },
     });
+
+    if (recentSubmission) {
+      this.logger.log(`[GROUPING] Found existing group — submissionId: ${recentSubmission.id}, createdAt: ${recentSubmission.createdAt.toISOString()}`);
+    } else {
+      this.logger.log(`[GROUPING] No existing group found — starting new group for supplier ${supplierId}`);
+    }
 
     return recentSubmission;
   }

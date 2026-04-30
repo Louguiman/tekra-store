@@ -7,7 +7,9 @@ services:
   postgres:
     restart: always
     environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-ecommerce_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     deploy:
@@ -29,7 +31,11 @@ services:
     restart: always
     environment:
       NODE_ENV: production
-      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      DB_NAME: ${POSTGRES_DB:-ecommerce_db}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     deploy:
       replicas: 2

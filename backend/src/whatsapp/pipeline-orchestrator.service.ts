@@ -45,7 +45,7 @@ export class PipelineOrchestratorService {
     const startTime = Date.now();
     
     try {
-      this.logger.log(`Starting pipeline processing for submission ${submissionId}`);
+      this.logger.log(`[PIPELINE] ===== START pipeline for submission ${submissionId} =====`);
 
       // Step 1: Verify submission exists and is ready for processing
       const submission = await this.submissionRepository.findOne({
@@ -57,9 +57,11 @@ export class PipelineOrchestratorService {
         throw new Error(`Submission ${submissionId} not found`);
       }
 
+      this.logger.log(`[PIPELINE][1] Submission loaded — status: ${submission.processingStatus}, validationStatus: ${submission.validationStatus}, supplier: ${submission.supplier.name}, contentType: ${submission.contentType}`);
+
       // Step 2: Process with AI if not already processed
       if (submission.processingStatus === 'pending') {
-        this.logger.log(`Processing submission ${submissionId} with AI`);
+        this.logger.log(`[PIPELINE][2] Dispatching to AI processing — submissionId: ${submissionId}`);
         await this.whatsappService.processSubmissionWithAI(submissionId);
         
         // Reload submission to get updated data
@@ -73,6 +75,9 @@ export class PipelineOrchestratorService {
         }
         
         Object.assign(submission, updatedSubmission);
+        this.logger.log(`[PIPELINE][2] AI processing done — status: ${submission.processingStatus}, extractedProducts: ${submission.extractedData?.length ?? 0}`);
+      } else {
+        this.logger.log(`[PIPELINE][2] Skipping AI processing — already in status: ${submission.processingStatus}`);
       }
 
       // Step 3: Check if AI processing was successful
@@ -80,20 +85,26 @@ export class PipelineOrchestratorService {
         throw new Error(`Submission ${submissionId} AI processing failed or incomplete`);
       }
 
+      this.logger.log(`[PIPELINE][3] AI processing status verified: completed`);
+
       // Step 4: Validate extracted data exists
       if (!submission.extractedData || submission.extractedData.length === 0) {
         throw new Error(`No extracted data found for submission ${submissionId}`);
       }
 
+      this.logger.log(`[PIPELINE][4] Extracted data validated — ${submission.extractedData.length} product(s)`);
+
       // Step 5: Check for auto-approval eligibility
+      this.logger.log(`[PIPELINE][5] Checking auto-approval eligibility for submission ${submissionId}`);
       const autoApprovalResult = await this.checkAutoApproval(submission);
+      this.logger.log(`[PIPELINE][5] Auto-approval result — eligible: ${autoApprovalResult.eligible}, reason: ${autoApprovalResult.reason}`);
       
       if (autoApprovalResult.eligible) {
-        this.logger.log(`Submission ${submissionId} eligible for auto-approval`);
+        this.logger.log(`[PIPELINE][6] Auto-approving submission ${submissionId}`);
         await this.autoApproveSubmission(submission, autoApprovalResult.reason);
+        this.logger.log(`[PIPELINE][6] Auto-approval complete — submission ${submissionId} integrated into inventory`);
       } else {
-        this.logger.log(`Submission ${submissionId} requires human validation`);
-        // Submission will wait in validation queue for human review
+        this.logger.log(`[PIPELINE][6] Submission ${submissionId} queued for human validation — reason: ${autoApprovalResult.reason}`);
       }
 
       const processingTime = Date.now() - startTime;
@@ -115,11 +126,11 @@ export class PipelineOrchestratorService {
         success: true,
       });
 
-      this.logger.log(`Pipeline processing completed for submission ${submissionId} in ${processingTime}ms`);
+      this.logger.log(`[PIPELINE] ===== END pipeline for submission ${submissionId} — totalTime: ${processingTime}ms, autoApproved: ${autoApprovalResult.eligible} =====`);
     } catch (error) {
       const processingTime = Date.now() - startTime;
       
-      this.logger.error(`Pipeline processing failed for submission ${submissionId}: ${error.message}`, error.stack);
+      this.logger.error(`[PIPELINE] ===== FAILED pipeline for submission ${submissionId} after ${processingTime}ms: ${error.message} =====`, error.stack);
 
       // Log the failure
       await this.auditService.logAction({
@@ -166,28 +177,35 @@ export class PipelineOrchestratorService {
     const minApprovalRate = 0.90;
     const minConfidence = 90;
 
+    this.logger.log(`[AUTO-APPROVE] Evaluating supplier ${supplier.id} — totalSubmissions: ${metrics?.totalSubmissions ?? 'N/A'}, approvedSubmissions: ${metrics?.approvedSubmissions ?? 'N/A'}`);
+
     if (!metrics || metrics.totalSubmissions < minSubmissions) {
-      return { eligible: false, reason: 'Insufficient submission history' };
+      const reason = `Insufficient submission history (${metrics?.totalSubmissions ?? 0}/${minSubmissions} required)`;
+      this.logger.log(`[AUTO-APPROVE] Not eligible — ${reason}`);
+      return { eligible: false, reason };
     }
 
     const approvalRate = metrics.approvedSubmissions / metrics.totalSubmissions;
     if (approvalRate < minApprovalRate) {
-      return { eligible: false, reason: `Approval rate too low: ${(approvalRate * 100).toFixed(1)}%` };
+      const reason = `Approval rate too low: ${(approvalRate * 100).toFixed(1)}% (min ${minApprovalRate * 100}%)`;
+      this.logger.log(`[AUTO-APPROVE] Not eligible — ${reason}`);
+      return { eligible: false, reason };
     }
 
     // Check confidence scores of all extracted products
-    const allHighConfidence = submission.extractedData.every(
-      product => product.confidenceScore >= minConfidence
-    );
+    const confidenceScores = submission.extractedData.map(p => p.confidenceScore);
+    const allHighConfidence = confidenceScores.every(score => score >= minConfidence);
+    this.logger.log(`[AUTO-APPROVE] Confidence scores: [${confidenceScores.join(', ')}] — allHighConfidence: ${allHighConfidence}`);
 
     if (!allHighConfidence) {
-      return { eligible: false, reason: 'One or more products have low confidence scores' };
+      const reason = `One or more products have low confidence scores (min ${minConfidence}%)`;
+      this.logger.log(`[AUTO-APPROVE] Not eligible — ${reason}`);
+      return { eligible: false, reason };
     }
 
-    return { 
-      eligible: true, 
-      reason: `Trusted supplier with ${metrics.totalSubmissions} submissions and ${(approvalRate * 100).toFixed(1)}% approval rate` 
-    };
+    const reason = `Trusted supplier with ${metrics.totalSubmissions} submissions and ${(approvalRate * 100).toFixed(1)}% approval rate`;
+    this.logger.log(`[AUTO-APPROVE] Eligible — ${reason}`);
+    return { eligible: true, reason };
   }
 
   /**
@@ -195,12 +213,13 @@ export class PipelineOrchestratorService {
    */
   private async autoApproveSubmission(submission: SupplierSubmission, reason: string): Promise<void> {
     try {
-      this.logger.log(`Auto-approving submission ${submission.id}: ${reason}`);
+      this.logger.log(`[AUTO-APPROVE] Processing ${submission.extractedData.length} product(s) for submission ${submission.id}`);
 
       // Process each extracted product
       for (let i = 0; i < submission.extractedData.length; i++) {
         const extractedProduct = submission.extractedData[i];
-        const validationId = `${submission.id}-${i}`;
+
+        this.logger.log(`[AUTO-APPROVE] Integrating product ${i + 1}/${submission.extractedData.length} — name: "${extractedProduct.name}", confidence: ${extractedProduct.confidenceScore}`);
 
         // Create validated product
         const validatedProduct = {
@@ -217,7 +236,7 @@ export class PipelineOrchestratorService {
           submission.id,
         );
 
-        this.logger.log(`Auto-approved product ${i + 1}/${submission.extractedData.length} from submission ${submission.id}`);
+        this.logger.log(`[AUTO-APPROVE] Product ${i + 1}/${submission.extractedData.length} integrated into inventory`);
       }
 
       // Update submission status
@@ -225,6 +244,8 @@ export class PipelineOrchestratorService {
       submission.validatedBy = 'system-auto-approval';
       submission.validationNotes = `Auto-approved: ${reason}`;
       await this.submissionRepository.save(submission);
+
+      this.logger.log(`[AUTO-APPROVE] Submission ${submission.id} marked as approved`);
 
       // Log the auto-approval
       await this.auditService.logAction({
@@ -243,7 +264,7 @@ export class PipelineOrchestratorService {
       });
 
     } catch (error) {
-      this.logger.error(`Auto-approval failed for submission ${submission.id}: ${error.message}`, error.stack);
+      this.logger.error(`[AUTO-APPROVE] FAILED for submission ${submission.id}: ${error.message}`, error.stack);
       
       // Log the failure
       await this.auditService.logAction({
@@ -271,7 +292,7 @@ export class PipelineOrchestratorService {
   @Cron(CronExpression.EVERY_5_MINUTES)
   async processPendingSubmissions(): Promise<void> {
     try {
-      this.logger.log('Checking for pending submissions to process');
+      this.logger.log('[CRON] processPendingSubmissions — checking for pending submissions');
 
       const pendingSubmissions = await this.submissionRepository.find({
         where: { processingStatus: 'pending' },
@@ -281,24 +302,30 @@ export class PipelineOrchestratorService {
       });
 
       if (pendingSubmissions.length === 0) {
-        this.logger.log('No pending submissions found');
+        this.logger.log('[CRON] No pending submissions found');
         return;
       }
 
-      this.logger.log(`Found ${pendingSubmissions.length} pending submissions to process`);
+      this.logger.log(`[CRON] Found ${pendingSubmissions.length} pending submission(s) — processing batch`);
+
+      let successCount = 0;
+      let failCount = 0;
 
       for (const submission of pendingSubmissions) {
         try {
+          this.logger.log(`[CRON] Processing submission ${submission.id} (supplier: ${submission.supplier.name})`);
           await this.processSubmissionPipeline(submission.id);
+          successCount++;
         } catch (error) {
-          this.logger.error(`Failed to process submission ${submission.id}: ${error.message}`);
+          failCount++;
+          this.logger.error(`[CRON] Failed to process submission ${submission.id}: ${error.message}`);
           // Continue with next submission
         }
       }
 
-      this.logger.log(`Completed processing ${pendingSubmissions.length} submissions`);
+      this.logger.log(`[CRON] Batch complete — success: ${successCount}, failed: ${failCount}`);
     } catch (error) {
-      this.logger.error(`Error in scheduled submission processing: ${error.message}`, error.stack);
+      this.logger.error(`[CRON] processPendingSubmissions error: ${error.message}`, error.stack);
     }
   }
 
@@ -309,7 +336,7 @@ export class PipelineOrchestratorService {
   @Cron(CronExpression.EVERY_HOUR)
   async checkStaleValidations(): Promise<void> {
     try {
-      this.logger.log('Checking for stale validations');
+      this.logger.log('[CRON] checkStaleValidations — scanning for validations pending > 24h');
 
       const staleThreshold = new Date();
       staleThreshold.setHours(staleThreshold.getHours() - 24); // 24 hours ago
@@ -326,8 +353,10 @@ export class PipelineOrchestratorService {
         submission => submission.createdAt < staleThreshold
       ).length;
 
+      this.logger.log(`[CRON] checkStaleValidations — total pending validations: ${staleSubmissions.length}, stale (>24h): ${staleCount}`);
+
       if (staleCount > 0) {
-        this.logger.warn(`Found ${staleCount} validations pending for more than 24 hours`);
+        this.logger.warn(`[CRON] ${staleCount} validation(s) have been pending for more than 24 hours`);
         
         // Record as a warning in health monitoring
         await this.healthMonitoringService.recordCriticalError(
@@ -337,10 +366,10 @@ export class PipelineOrchestratorService {
           { staleCount, threshold: '24 hours' }
         );
       } else {
-        this.logger.log('No stale validations found');
+        this.logger.log('[CRON] No stale validations found');
       }
     } catch (error) {
-      this.logger.error(`Error checking stale validations: ${error.message}`, error.stack);
+      this.logger.error(`[CRON] checkStaleValidations error: ${error.message}`, error.stack);
     }
   }
 
@@ -404,7 +433,7 @@ export class PipelineOrchestratorService {
    * Manually trigger pipeline processing for a specific submission
    */
   async triggerPipelineProcessing(submissionId: string): Promise<void> {
-    this.logger.log(`Manually triggering pipeline processing for submission ${submissionId}`);
+    this.logger.log(`[PIPELINE] Manual trigger for submission ${submissionId}`);
     await this.processSubmissionPipeline(submissionId);
   }
 
@@ -412,6 +441,8 @@ export class PipelineOrchestratorService {
    * Reprocess a failed submission
    */
   async reprocessFailedSubmission(submissionId: string): Promise<void> {
+    this.logger.log(`[PIPELINE] Reprocess requested for submission ${submissionId}`);
+
     const submission = await this.submissionRepository.findOne({
       where: { id: submissionId },
       relations: ['supplier'],
@@ -430,7 +461,7 @@ export class PipelineOrchestratorService {
     submission.extractedData = null;
     await this.submissionRepository.save(submission);
 
-    this.logger.log(`Reset submission ${submissionId} to pending status for reprocessing`);
+    this.logger.log(`[PIPELINE] Submission ${submissionId} reset to 'pending' for reprocessing`);
 
     // Trigger pipeline processing
     await this.processSubmissionPipeline(submissionId);

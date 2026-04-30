@@ -76,6 +76,8 @@ export class SecurityProcessingService {
     const threats: SecurityThreat[] = [];
     const checksPerformed: string[] = [];
 
+    this.logger.log(`[SECURITY] Scanning text content — supplierId: ${supplierId}, contentLength: ${content.length} chars`);
+
     try {
       // Check 1: Length validation
       checksPerformed.push('length_validation');
@@ -162,6 +164,8 @@ export class SecurityProcessingService {
 
       const scanDuration = Date.now() - startTime;
 
+      this.logger.log(`[SECURITY] Text scan complete — supplierId: ${supplierId}, threats: ${threats.length}, riskLevel: ${riskLevel}, duration: ${scanDuration}ms, passed: ${threats.length === 0 || riskLevel === 'low'}`);
+
       return {
         passed: threats.length === 0 || riskLevel === 'low',
         threats,
@@ -173,7 +177,7 @@ export class SecurityProcessingService {
         },
       };
     } catch (error) {
-      this.logger.error('Error scanning text content', error);
+      this.logger.error(`[SECURITY] Text scan ERROR — supplierId: ${supplierId}: ${error.message}`);
       throw new BadRequestException('Security scan failed');
     }
   }
@@ -191,6 +195,8 @@ export class SecurityProcessingService {
     const startTime = Date.now();
     const threats: SecurityThreat[] = [];
     const checksPerformed: string[] = [];
+
+    this.logger.log(`[SECURITY] Scanning file — supplierId: ${supplierId}, fileName: ${fileName}, mimeType: ${mimeType}, size: ${fileBuffer.length} bytes`);
 
     try {
       // Check 1: File size validation
@@ -263,6 +269,8 @@ export class SecurityProcessingService {
 
       const scanDuration = Date.now() - startTime;
 
+      this.logger.log(`[SECURITY] File scan complete — supplierId: ${supplierId}, fileName: ${fileName}, threats: ${threats.length}, riskLevel: ${riskLevel}, duration: ${scanDuration}ms, passed: ${threats.length === 0 || riskLevel === 'low'}`);
+
       return {
         passed: threats.length === 0 || riskLevel === 'low',
         threats,
@@ -273,7 +281,7 @@ export class SecurityProcessingService {
         },
       };
     } catch (error) {
-      this.logger.error('Error scanning file content', error);
+      this.logger.error(`[SECURITY] File scan ERROR — supplierId: ${supplierId}, fileName: ${fileName}: ${error.message}`);
       throw new BadRequestException('File security scan failed');
     }
   }

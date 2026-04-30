@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 interface RateLimitEntry {
   count: number;
@@ -7,6 +7,7 @@ interface RateLimitEntry {
 
 @Injectable()
 export class RateLimiterService {
+  private readonly logger = new Logger(RateLimiterService.name);
   private readonly limits = new Map<string, RateLimitEntry>();
   private readonly maxRequests = 100; // Max requests per window
   private readonly windowMs = 60 * 1000; // 1 minute window
@@ -21,14 +22,17 @@ export class RateLimiterService {
         count: 1,
         resetTime: now + this.windowMs,
       });
+      this.logger.log(`[RATE-LIMIT] New window for ${identifier} — count: 1/${this.maxRequests}`);
       return false;
     }
 
     if (entry.count >= this.maxRequests) {
+      this.logger.warn(`[RATE-LIMIT] EXCEEDED for ${identifier} — count: ${entry.count}/${this.maxRequests}, resets in ${Math.ceil((entry.resetTime - now) / 1000)}s`);
       return true;
     }
 
     entry.count++;
+    this.logger.debug(`[RATE-LIMIT] ${identifier} — count: ${entry.count}/${this.maxRequests}`);
     return false;
   }
 

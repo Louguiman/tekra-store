@@ -12,6 +12,7 @@ import {
   Param,
   Query,
   Patch,
+  Logger,
 } from '@nestjs/common';
 import { WhatsappService, WhatsAppWebhookPayload } from './whatsapp.service';
 import { RateLimiterService } from './rate-limiter.service';
@@ -26,6 +27,8 @@ import { UserRole } from '../entities/user.entity';
 
 @Controller('whatsapp')
 export class WhatsappController {
+  private readonly logger = new Logger(WhatsappController.name);
+
   constructor(
     private readonly whatsappService: WhatsappService,
     private readonly rateLimiterService: RateLimiterService,
@@ -49,9 +52,12 @@ export class WhatsappController {
       // Extract client IP for rate limiting
       const clientIp = realIp || forwardedFor?.split(',')[0] || 'unknown';
       
+      this.logger.log(`[CHECKPOINT 1] Webhook received — IP: ${clientIp}, object: ${payload?.object}, signature: ${signature ? 'present' : 'MISSING'}`);
+
       // Apply rate limiting (Requirement 5.3)
       if (this.rateLimiterService.isRateLimited(clientIp)) {
         const resetTime = this.rateLimiterService.getResetTime(clientIp);
+        this.logger.warn(`[CHECKPOINT 1] Rate limit exceeded for IP: ${clientIp}`);
         throw new HttpException(
           {
             message: 'Rate limit exceeded',
@@ -61,23 +67,35 @@ export class WhatsappController {
         );
       }
 
+      this.logger.log(`[CHECKPOINT 2] Rate limit OK — remaining: ${this.rateLimiterService.getRemainingRequests(clientIp)} req`);
+
       // Validate webhook signature for security (Requirement 8.5)
       const rawPayload = JSON.stringify(payload);
       if (!this.whatsappService.validateWebhookSignature(signature, rawPayload)) {
+        this.logger.warn(`[CHECKPOINT 3] Signature validation FAILED — IP: ${clientIp}`);
         throw new UnauthorizedException('Invalid webhook signature');
       }
 
+      this.logger.log(`[CHECKPOINT 3] Signature validation OK`);
+
       // Validate payload structure (Requirement 1.1)
       if (!payload.object || payload.object !== 'whatsapp_business_account') {
+        this.logger.warn(`[CHECKPOINT 4] Invalid payload object: ${payload?.object}`);
         throw new BadRequestException('Invalid webhook payload');
       }
 
+      this.logger.log(`[CHECKPOINT 4] Payload structure OK — object: ${payload.object}`);
+
       // Validate user agent for additional security
       if (userAgent && !userAgent.includes('WhatsApp')) {
+        this.logger.warn(`[CHECKPOINT 5] Unexpected user-agent: ${userAgent}`);
         throw new UnauthorizedException('Invalid user agent');
       }
 
+      this.logger.log(`[CHECKPOINT 5] User-agent OK — ${userAgent || 'not provided'}`);
+
       // Process the incoming message with timeout handling
+      this.logger.log(`[CHECKPOINT 6] Dispatching to WhatsappService.processIncomingMessage`);
       const result = await Promise.race([
         this.whatsappService.processIncomingMessage(payload),
         new Promise<never>((_, reject) => 
@@ -86,33 +104,43 @@ export class WhatsappController {
       ]);
       
       if (!result.processed) {
+        this.logger.warn(`[CHECKPOINT 7] Message processing returned not-processed: ${result.error}`);
         throw new BadRequestException(result.error || 'Failed to process message');
       }
 
+      this.logger.log(`[CHECKPOINT 7] Message processed OK — submissionId: ${result.submissionId}, supplierAuthenticated: ${result.supplierAuthenticated}, processingTime: ${result.processingTime}ms`);
+
       // Trigger pipeline processing asynchronously (don't wait for completion)
       if (result.submissionId) {
+        this.logger.log(`[CHECKPOINT 8] Triggering async pipeline for submissionId: ${result.submissionId}`);
         // Process in background without blocking webhook response
         this.pipelineOrchestratorService.processSubmissionPipeline(result.submissionId)
+          .then(() => {
+            this.logger.log(`[CHECKPOINT 8] Background pipeline completed for submissionId: ${result.submissionId}`);
+          })
           .catch(error => {
-            console.error(`Background pipeline processing failed for ${result.submissionId}:`, error.message);
+            this.logger.error(`[CHECKPOINT 8] Background pipeline FAILED for submissionId: ${result.submissionId} — ${error.message}`, error.stack);
           });
       }
+
+      const totalTime = Date.now() - startTime;
+      this.logger.log(`[CHECKPOINT 9] Webhook response sent — submissionId: ${result.submissionId}, totalTime: ${totalTime}ms`);
 
       return {
         success: true,
         submissionId: result.submissionId,
         processingTime: result.processingTime,
-        totalTime: Date.now() - startTime,
+        totalTime,
       };
 
     } catch (error) {
       const processingTime = Date.now() - startTime;
       
       // Log error for monitoring
-      console.error('Webhook processing error:', {
+      this.logger.error(`[CHECKPOINT ERROR] Webhook processing error after ${processingTime}ms: ${error.message}`, {
         error: error.message,
         processingTime,
-        payload: payload.object,
+        payload: payload?.object,
         signature: signature ? 'present' : 'missing',
       });
 
