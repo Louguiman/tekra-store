@@ -60,9 +60,15 @@ check_environment() {
 deploy_services() {
     print_status "Building and starting services..."
     
-    # Stop existing services
-    print_status "Stopping existing services..."
-    docker-compose down
+    # Check if clean deployment is requested
+    if [ "$1" == "--clean" ]; then
+        print_warning "Clean deployment requested. Wiping volumes..."
+        docker-compose down -v
+    else
+        # Stop existing services
+        print_status "Stopping existing services..."
+        docker-compose down
+    fi
     
     # Build images
     print_status "Building Docker images..."
@@ -129,9 +135,14 @@ show_status() {
 
 # Main deployment flow
 main() {
+    CLEAN_FLAG=""
+    if [ "$1" == "--clean" ]; then
+        CLEAN_FLAG="--clean"
+    fi
+    
     check_dependencies
     check_environment
-    deploy_services
+    deploy_services "$CLEAN_FLAG"
     wait_for_services
     setup_database
     show_status
@@ -139,6 +150,9 @@ main() {
 
 # Handle script arguments
 case "${1:-}" in
+    "--clean")
+        main "--clean"
+        ;;
     "build")
         print_status "Building images only..."
         docker-compose build --no-cache

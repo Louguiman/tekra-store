@@ -1,9 +1,35 @@
 version: '3.8'
 
 services:
+  # Helper service to automatically clean up volumes if Postgres version changes (e.g., 15 -> 16)
+  postgres-init:
+    image: alpine:latest
+    container_name: ecommerce_postgres_init
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: >
+      sh -c "
+        if [ -f /var/lib/postgresql/data/PG_VERSION ]; then
+          VERSION=$$(cat /var/lib/postgresql/data/PG_VERSION)
+          if [ \"$$VERSION\" != \"16\" ]; then
+            echo \"Detected incompatible Postgres version $$VERSION. Cleaning volume for version 16...\"
+            rm -rf /var/lib/postgresql/data/*
+          else
+            echo \"Postgres version $$VERSION is compatible.\"
+          fi
+        else
+          echo \"No existing database found. Fresh installation will proceed.\"
+        fi
+      "
+    networks:
+      - ecommerce_network
+
   postgres:
     image: postgres:16-alpine
     container_name: ecommerce_postgres
+    depends_on:
+      postgres-init:
+        condition: service_completed_successfully
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-ecommerce_db}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}

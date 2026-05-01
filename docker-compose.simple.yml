@@ -1,9 +1,26 @@
 version: '3.8'
 
 services:
+  postgres-init:
+    image: alpine:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: >
+      sh -c "
+        if [ -f /var/lib/postgresql/data/PG_VERSION ]; then
+          VERSION=$$(cat /var/lib/postgresql/data/PG_VERSION)
+          if [ \"$$VERSION\" != \"16\" ]; then
+            rm -rf /var/lib/postgresql/data/*
+          fi
+        fi
+      "
+
   postgres:
     image: postgres:16-alpine
     container_name: ecommerce_postgres
+    depends_on:
+      postgres-init:
+        condition: service_completed_successfully
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-ecommerce_db}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}

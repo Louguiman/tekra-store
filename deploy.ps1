@@ -1,7 +1,8 @@
 # West Africa E-commerce Platform Deployment Script (PowerShell)
 
 param(
-    [string]$Action = "deploy"
+    [string]$Action = "deploy",
+    [switch]$Clean = $false
 )
 
 # Colors for output
@@ -60,9 +61,14 @@ function Check-Environment {
 function Deploy-Services {
     Write-Status "Building and starting services..."
     
-    # Stop existing services
-    Write-Status "Stopping existing services..."
-    docker-compose down
+    if ($Clean) {
+        Write-Warning "Clean deployment requested. Wiping volumes..."
+        docker-compose down -v
+    } else {
+        # Stop existing services
+        Write-Status "Stopping existing services..."
+        docker-compose down
+    }
     
     # Build images
     Write-Status "Building Docker images..."
