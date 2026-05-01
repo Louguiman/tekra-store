@@ -2,12 +2,14 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: ecommerce_postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-ecommerce_db}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      # Explicitly set the user for the initialization
+      PGUSER: ${POSTGRES_USER:-postgres}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -51,6 +53,12 @@ services:
       DB_USERNAME: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-password}
       DB_NAME: ${POSTGRES_DB:-ecommerce_db}
+      # Also set standard PG env vars for the backend
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-password}
+      PGDATABASE: ${POSTGRES_DB:-ecommerce_db}
+      PGHOST: postgres
+      PGPORT: 5432
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       MAX_FILE_SIZE: ${MAX_FILE_SIZE:-5242880}

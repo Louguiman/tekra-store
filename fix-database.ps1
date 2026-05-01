@@ -65,9 +65,9 @@ Write-Host ""
 Write-Host "Step 2: Testing database connectivity..." -ForegroundColor Yellow
 
 $dbTest = if ($composeCmd -eq "docker-compose") {
-    docker-compose exec -T db psql -U postgres -d ecommerce -c "SELECT 1;" 2>&1
+    docker-compose exec -T postgres pg_isready -d ecommerce_db 2>&1
 } else {
-    docker compose exec -T db psql -U postgres -d ecommerce -c "SELECT 1;" 2>&1
+    docker compose exec -T postgres pg_isready -d ecommerce_db 2>&1
 }
 
 if ($LASTEXITCODE -eq 0) {
@@ -76,9 +76,9 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "✗ Cannot connect to database" -ForegroundColor Red
     Write-Host "Checking database logs..." -ForegroundColor Yellow
     if ($composeCmd -eq "docker-compose") {
-        docker-compose logs --tail=20 db
+        docker-compose logs --tail=20 postgres
     } else {
-        docker compose logs --tail=20 db
+        docker compose logs --tail=20 postgres
     }
     exit 1
 }
@@ -89,9 +89,9 @@ Write-Host ""
 Write-Host "Step 3: Checking migrations table..." -ForegroundColor Yellow
 
 $migrationsCheck = if ($composeCmd -eq "docker-compose") {
-    docker-compose exec -T db psql -U postgres -d ecommerce -c "SELECT COUNT(*) FROM migrations;" 2>&1
+    docker-compose exec -T postgres psql -U postgres -d ecommerce_db -c "SELECT COUNT(*) FROM migrations;" 2>&1
 } else {
-    docker compose exec -T db psql -U postgres -d ecommerce -c "SELECT COUNT(*) FROM migrations;" 2>&1
+    docker compose exec -T postgres psql -U postgres -d ecommerce_db -c "SELECT COUNT(*) FROM migrations;" 2>&1
 }
 
 if ($LASTEXITCODE -eq 0) {

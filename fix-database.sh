@@ -36,7 +36,7 @@ else
     sleep 5
 fi
 
-if $COMPOSE_CMD ps | grep -q "db.*Up"; then
+if $COMPOSE_CMD ps | grep -q "postgres.*Up"; then
     echo -e "${GREEN}✓ Database container is running${NC}"
 else
     echo -e "${RED}✗ Database container is not running${NC}"
@@ -47,12 +47,12 @@ echo ""
 
 # Step 2: Check database connectivity
 echo "Step 2: Testing database connectivity..."
-if $COMPOSE_CMD exec -T db psql -U postgres -d ecommerce -c "SELECT 1;" &> /dev/null; then
+if $COMPOSE_CMD exec -T postgres pg_isready -d ecommerce_db &> /dev/null; then
     echo -e "${GREEN}✓ Database is accessible${NC}"
 else
     echo -e "${RED}✗ Cannot connect to database${NC}"
     echo "Checking database logs..."
-    $COMPOSE_CMD logs --tail=20 db
+    $COMPOSE_CMD logs --tail=20 postgres
     exit 1
 fi
 
@@ -60,9 +60,9 @@ echo ""
 
 # Step 3: Check if migrations table exists
 echo "Step 3: Checking migrations table..."
-if $COMPOSE_CMD exec -T db psql -U postgres -d ecommerce -c "SELECT COUNT(*) FROM migrations;" &> /dev/null; then
+if $COMPOSE_CMD exec -T postgres psql -U postgres -d ecommerce_db -c "SELECT COUNT(*) FROM migrations;" &> /dev/null; then
     echo -e "${GREEN}✓ Migrations table exists${NC}"
-    MIGRATION_COUNT=$($COMPOSE_CMD exec -T db psql -U postgres -d ecommerce -t -c "SELECT COUNT(*) FROM migrations;" | tr -d ' ')
+    MIGRATION_COUNT=$($COMPOSE_CMD exec -T postgres psql -U postgres -d ecommerce_db -t -c "SELECT COUNT(*) FROM migrations;" | tr -d ' ')
     echo "  Found $MIGRATION_COUNT migration(s) already run"
 else
     echo -e "${YELLOW}⚠ Migrations table does not exist (first run)${NC}"
@@ -72,9 +72,9 @@ echo ""
 
 # Step 4: Check if supplier_submissions table exists
 echo "Step 4: Checking supplier_submissions table..."
-if $COMPOSE_CMD exec -T db psql -U postgres -d ecommerce -c "SELECT COUNT(*) FROM supplier_submissions;" &> /dev/null; then
+if $COMPOSE_CMD exec -T postgres psql -U postgres -d ecommerce_db -c "SELECT COUNT(*) FROM supplier_submissions;" &> /dev/null; then
     echo -e "${GREEN}✓ supplier_submissions table exists${NC}"
-    SUBMISSION_COUNT=$($COMPOSE_CMD exec -T db psql -U postgres -d ecommerce -t -c "SELECT COUNT(*) FROM supplier_submissions;" | tr -d ' ')
+    SUBMISSION_COUNT=$($COMPOSE_CMD exec -T postgres psql -U postgres -d ecommerce_db -t -c "SELECT COUNT(*) FROM supplier_submissions;" | tr -d ' ')
     echo "  Found $SUBMISSION_COUNT submission(s)"
 else
     echo -e "${RED}✗ supplier_submissions table does not exist${NC}"
@@ -85,7 +85,7 @@ echo ""
 
 # Step 5: Check if audit_logs table exists
 echo "Step 5: Checking audit_logs table..."
-if $COMPOSE_CMD exec -T db psql -U postgres -d ecommerce -c "SELECT COUNT(*) FROM audit_logs;" &> /dev/null; then
+if $COMPOSE_CMD exec -T postgres psql -U postgres -d ecommerce_db -c "SELECT COUNT(*) FROM audit_logs;" &> /dev/null; then
     echo -e "${GREEN}✓ audit_logs table exists${NC}"
 else
     echo -e "${RED}✗ audit_logs table does not exist${NC}"
