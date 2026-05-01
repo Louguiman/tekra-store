@@ -52,7 +52,7 @@ services:
       JWT_EXPIRES_IN: 7d
       MAX_FILE_SIZE: 5242880
       UPLOAD_PATH: uploads
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:3002
     ports:
       - "3001:3001"
     volumes:
@@ -74,9 +74,9 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: http://localhost:3001/api
-      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3002
     ports:
-      - "3000:3000"
+      - "3000:3002"
     networks:
       - ecommerce_network
     depends_on:
