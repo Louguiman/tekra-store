@@ -20,16 +20,21 @@ export function CurrencyDisplay({
   const { selectedCountry } = useSelector((state: RootState) => state.country)
 
   // For now, all countries use FCFA, but this component is ready for future expansion
-  const formatAmount = (value: number) => {
+  const formatAmount = (value: any) => {
+    // Ensure value is a number (Postgres numeric types often come back as strings)
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    
+    if (isNaN(numericValue)) return '0 FCFA';
+
     if (!showCurrency) {
       return new Intl.NumberFormat('fr-FR', {
         style: 'decimal',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
-      }).format(Math.round(value))
+      }).format(Math.round(numericValue))
     }
     
-    return formatFCFA(value)
+    return formatFCFA(numericValue)
   }
 
   if (promoAmount && promoAmount < amount) {

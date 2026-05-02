@@ -107,7 +107,7 @@ export function ProductCard({ product, countryCode }: ProductCardProps) {
           {/* Gaming Segment */}
           <div className="flex items-center mb-4">
             <span className="px-3 py-1 bg-dark-200/50 text-dark-600 text-xs font-tech font-medium rounded-lg border border-dark-300/30 capitalize">
-              {product.segment.replace('_', ' ')}
+              {product.segment?.name?.replace('_', ' ') || 'Product'}
             </span>
           </div>
 

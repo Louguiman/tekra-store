@@ -22,13 +22,21 @@ export function formatFCFA(amount: number): string {
  * @param currencyString - String like "1 000 FCFA" or "1000 FCFA"
  * @returns Numeric amount
  */
-export function parseFCFA(currencyString: string): number {
-  if (!currencyString || typeof currencyString !== 'string') {
+export function parseFCFA(currencyString: any): number {
+  if (!currencyString) {
     return 0;
   }
 
+  // If it's already a number, return it
+  if (typeof currencyString === 'number') {
+    return currencyString;
+  }
+
+  // If it's not a string, convert it to one
+  const str = String(currencyString);
+
   // Remove FCFA and any non-numeric characters except spaces
-  const numericString = currencyString
+  const numericString = str
     .replace(/FCFA/gi, '')
     .replace(/[^\d\s]/g, '')
     .replace(/\s+/g, '');
