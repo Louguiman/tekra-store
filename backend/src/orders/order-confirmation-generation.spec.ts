@@ -120,7 +120,7 @@ describe('Order Confirmation Generation Property Tests', () => {
           jest.clearAllMocks();
 
           // Setup mocks for successful order creation
-          const mockCountry = { id: orderData.countryId, name: 'Test Country', code: 'TC' };
+          const mockCountry = { id: orderData.countryId, name: 'Test Country', code: 'TC', isDefault: false };
           const mockUser = orderData.userId ? { id: orderData.userId, email: 'test@example.com' } : null;
           
           const mockProducts = orderData.items.map((item, index) => ({
@@ -278,7 +278,7 @@ describe('Order Confirmation Generation Property Tests', () => {
             const orderData = ordersData[i];
             
             // Setup mocks for each order
-            const mockCountry = { id: orderData.countryId, name: `Test Country ${i}`, code: `T${i}` };
+            const mockCountry = { id: orderData.countryId, name: `Test Country ${i}`, code: `T${i}`, isDefault: false };
             const mockProducts = orderData.items.map((item, index) => ({
               id: item.productId,
               name: `Product ${i}-${index}`,

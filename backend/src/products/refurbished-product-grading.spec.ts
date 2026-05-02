@@ -46,7 +46,8 @@ describe('Refurbished Product Grading Property Tests', () => {
     id: 'country-1',
     code: 'ML',
     name: 'Mali',
-    currency: 'FCFA'
+    currency: 'FCFA',
+    isDefault: true
   };
 
   beforeEach(async () => {

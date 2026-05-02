@@ -27,9 +27,9 @@ describe('Search Functionality Property Tests', () => {
   let mockQueryBuilder: any;
 
   const mockCountries = [
-    { id: '1', code: 'ML', name: 'Mali', currency: 'FCFA' },
-    { id: '2', code: 'CI', name: 'Côte d\'Ivoire', currency: 'FCFA' },
-    { id: '3', code: 'BF', name: 'Burkina Faso', currency: 'FCFA' }
+    { id: '1', code: 'ML', name: 'Mali', currency: 'FCFA', isDefault: true },
+    { id: '2', code: 'CI', name: 'Côte d\'Ivoire', currency: 'FCFA', isDefault: false },
+    { id: '3', code: 'BF', name: 'Burkina Faso', currency: 'FCFA', isDefault: false }
   ];
 
   const mockCategories = [

@@ -99,7 +99,7 @@ describe('Delivery Estimation Properties', () => {
           const mockDeliveryMethod = {
             ...deliveryMethodData,
             estimatedDaysMax,
-            country: { code: countryCode },
+            country: { code: countryCode, isDefault: countryCode === 'ML' },
           };
 
           mockRepository.findOne.mockResolvedValue(mockDeliveryMethod);

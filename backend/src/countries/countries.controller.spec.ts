@@ -13,6 +13,7 @@ describe('CountriesController', () => {
     code: 'ML',
     name: 'Mali',
     currency: 'FCFA',
+    isDefault: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     orders: [],

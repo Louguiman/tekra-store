@@ -110,6 +110,7 @@ describe('Inventory Management Integration', () => {
       code: 'ML',
       name: 'Mali',
       currency: 'FCFA',
+      isDefault: true,
     });
 
     // Create category

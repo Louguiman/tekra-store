@@ -144,6 +144,7 @@ describe('Order History Maintenance Property Tests', () => {
             id: fc.uuid(),
             name: fc.string({ minLength: 3, maxLength: 50 }),
             code: fc.constantFrom('ML', 'CI', 'BF'),
+            isDefault: fc.boolean(),
           }),
         }),
         async (testData) => {

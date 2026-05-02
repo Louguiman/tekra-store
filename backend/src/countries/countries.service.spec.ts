@@ -16,6 +16,7 @@ describe('CountriesService', () => {
     code: 'ML',
     name: 'Mali',
     currency: 'FCFA',
+    isDefault: true,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -27,6 +28,7 @@ describe('CountriesService', () => {
       code: 'CI',
       name: 'Côte d\'Ivoire',
       currency: 'FCFA',
+      isDefault: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -35,6 +37,7 @@ describe('CountriesService', () => {
       code: 'BF',
       name: 'Burkina Faso',
       currency: 'FCFA',
+      isDefault: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -77,7 +80,7 @@ describe('CountriesService', () => {
 
       expect(result).toEqual(mockCountries);
       expect(countryRepository.find).toHaveBeenCalledWith({
-        order: { name: 'ASC' },
+        order: { isDefault: 'DESC', name: 'ASC' },
       });
     });
   });

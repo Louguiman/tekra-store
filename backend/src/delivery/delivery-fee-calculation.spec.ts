@@ -100,7 +100,7 @@ describe('Delivery Fee Calculation Properties', () => {
               baseFee: testData.baseFee,
               estimatedDaysMin: testData.estimatedDaysMin,
               estimatedDaysMax: testData.estimatedDaysMax,
-              country: { code: testData.countryCode },
+              country: { code: testData.countryCode, isDefault: testData.countryCode === 'ML' },
               isActive: true,
             };
 

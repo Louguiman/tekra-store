@@ -50,6 +50,7 @@ describe('ProductsService', () => {
     code: 'ML',
     name: 'Mali',
     currency: 'FCFA',
+    isDefault: true,
   };
 
   const mockProductImage = {
