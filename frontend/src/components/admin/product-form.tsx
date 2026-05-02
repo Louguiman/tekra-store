@@ -70,7 +70,7 @@ export default function ProductForm({ product }: ProductFormProps) {
       name: product?.name || '',
       description: product?.description || '',
       categoryId: product?.category?.id || '',
-      segmentId: product?.segment || '',
+      segmentId: (typeof product?.segment === 'string' ? product.segment : product?.segment?.id) || '',
       brand: product?.brand || '',
       isRefurbished: product?.isRefurbished || false,
       refurbishedGrade: product?.refurbishedGrade,

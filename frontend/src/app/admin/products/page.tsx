@@ -212,7 +212,7 @@ export default function AdminProductsPage() {
                           {product.category?.name || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-700 font-tech">
-                          {product.segment?.replace('_', ' ') || 'N/A'}
+                          {(typeof product.segment === 'string' ? product.segment : product.segment?.name)?.replace('_', ' ') || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-700 font-tech">
                           {product.prices && product.prices.length > 0 ? (

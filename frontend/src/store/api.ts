@@ -494,7 +494,12 @@ export const api = createApi({
 
 export const {
   useGetCountriesQuery,
+  useGetDefaultCountryQuery,
   useGetCountryByCodeQuery,
+  useCreateCountryMutation,
+  useUpdateCountryMutation,
+  useDeleteCountryMutation,
+  useSetDefaultCountryMutation,
   useGetCountryConfigQuery,
   useGetProductPricesForCountryQuery,
   useFormatCurrencyQuery,
@@ -574,6 +579,7 @@ export interface Country {
   code: string
   name: string
   currency: string
+  isDefault: boolean
   createdAt: string
   updatedAt: string
 }
@@ -797,6 +803,12 @@ export interface ProductImage {
   isPrimary: boolean
 }
 
+export interface ProductSegmentEntity {
+  id: string
+  name: string
+  description?: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -809,7 +821,7 @@ export interface Product {
   createdAt: string
   updatedAt: string
   category: Category
-  segment: ProductSegment
+  segment: ProductSegmentEntity
   specifications: ProductSpecification[]
   images: ProductImage[]
   prices: ProductPrice[]

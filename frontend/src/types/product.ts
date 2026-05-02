@@ -42,6 +42,12 @@ export interface ProductImage {
   isPrimary: boolean
 }
 
+export interface ProductSegmentEntity {
+  id: string
+  name: string
+  description?: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -54,7 +60,7 @@ export interface Product {
   createdAt: string
   updatedAt: string
   category?: Category
-  segment: ProductSegment
+  segment: ProductSegmentEntity | ProductSegment
   specifications?: ProductSpecification[]
   images?: ProductImage[]
   prices?: ProductPrice[]

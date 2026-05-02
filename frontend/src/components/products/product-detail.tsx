@@ -101,8 +101,8 @@ export function ProductDetail({ slug }: ProductDetailProps) {
           <li>/</li>
           <li><Link href="/products" className="hover:text-primary-600">Products</Link></li>
           <li>/</li>
-          <li><Link href={`/categories/${product.segment.replace('_', '-')}`} className="hover:text-primary-600 capitalize">
-            {product.segment.replace('_', ' ')}
+          <li><Link href={`/categories/${(typeof product.segment === 'string' ? product.segment : product.segment?.name)?.replace('_', '-')}`} className="hover:text-primary-600 capitalize">
+            {(typeof product.segment === 'string' ? product.segment : product.segment?.name)?.replace('_', ' ')}
           </Link></li>
           <li>/</li>
           <li className="text-gray-900">{product.name}</li>
@@ -126,7 +126,7 @@ export function ProductDetail({ slug }: ProductDetailProps) {
           {/* Segment & Category */}
           <div className="flex items-center space-x-4 mb-4">
             <span className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium capitalize">
-              {product.segment.replace('_', ' ')}
+              {(typeof product.segment === 'string' ? product.segment : product.segment?.name)?.replace('_', ' ')}
             </span>
             <span className="text-gray-500">•</span>
             <span className="text-gray-600">{product.category.name}</span>
