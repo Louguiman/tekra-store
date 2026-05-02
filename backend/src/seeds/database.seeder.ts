@@ -31,9 +31,9 @@ export class DatabaseSeeder {
     const countryRepository = this.dataSource.getRepository(Country);
     
     const countries = [
-      { code: 'ML', name: 'Mali', currency: 'FCFA' },
-      { code: 'CI', name: 'Côte d\'Ivoire', currency: 'FCFA' },
-      { code: 'BF', name: 'Burkina Faso', currency: 'FCFA' },
+      { code: 'ML', name: 'Mali', currency: 'FCFA', isDefault: true },
+      { code: 'CI', name: 'Côte d\'Ivoire', currency: 'FCFA', isDefault: false },
+      { code: 'BF', name: 'Burkina Faso', currency: 'FCFA', isDefault: false },
     ];
 
     for (const countryData of countries) {

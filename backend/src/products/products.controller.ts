@@ -24,10 +24,14 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { RefurbishedGrade } from '../entities/product.entity';
 import { UserRole } from '../entities/user.entity';
+import { StorageService } from '../common/storage/storage.service';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -111,9 +115,8 @@ export class ProductsController {
       throw new BadRequestException('No image file provided');
     }
 
-    // In a real implementation, you would upload the file to a storage service
-    // and get back a URL. For now, we'll simulate this with a placeholder URL.
-    const imageUrl = `https://storage.example.com/products/${productId}/${file.originalname}`;
+    // Upload the file to Cloudflare R2
+    const imageUrl = await this.storageService.uploadFile(file, 'products');
 
     return this.productsService.uploadProductImage(
       productId,
@@ -127,7 +130,13 @@ export class ProductsController {
   @Delete('images/:imageId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.STAFF)
-  deleteImage(@Param('imageId') imageId: string) {
+  async deleteImage(@Param('imageId') imageId: string) {
+    // Get image to find URL
+    const image = await this.productsService.getProductImage(imageId);
+    if (image) {
+      // Delete from storage
+      await this.storageService.deleteFile(image.url);
+    }
     return this.productsService.deleteProductImage(imageId);
   }
 

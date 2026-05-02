@@ -49,9 +49,15 @@ export class ProductsService {
     }
 
     // Validate segment exists - segmentId can be either UUID or segment name
-    let segment = await this.segmentRepository.findOne({ where: { id: segmentId } });
+    let segment;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segmentId);
+    
+    if (isUuid) {
+      segment = await this.segmentRepository.findOne({ where: { id: segmentId } });
+    }
+    
     if (!segment) {
-      // Try to find by name if not found by ID
+      // Try to find by name if not found by ID or if segmentId is not a UUID
       segment = await this.segmentRepository.findOne({ where: { name: segmentId as any } });
       if (!segment) {
         throw new NotFoundException(`Segment with ID or name ${segmentId} not found`);
@@ -314,6 +320,10 @@ export class ProductsService {
     });
 
     return this.productImageRepository.save(image);
+  }
+
+  async getProductImage(imageId: string): Promise<ProductImage | null> {
+    return this.productImageRepository.findOne({ where: { id: imageId } });
   }
 
   async deleteProductImage(imageId: string): Promise<void> {

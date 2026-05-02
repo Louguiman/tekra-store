@@ -223,9 +223,43 @@ export const api = createApi({
       query: () => '/countries',
       providesTags: ['Country'],
     }),
+    getDefaultCountry: builder.query<Country, void>({
+      query: () => '/countries/default',
+      providesTags: ['Country'],
+    }),
     getCountryByCode: builder.query<Country, string>({
       query: (code) => `/countries/${code}`,
       providesTags: ['Country'],
+    }),
+    createCountry: builder.mutation<Country, Partial<Country>>({
+      query: (body) => ({
+        url: '/countries',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Country'],
+    }),
+    updateCountry: builder.mutation<Country, { code: string; body: Partial<Country> }>({
+      query: ({ code, body }) => ({
+        url: `/countries/${code}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ['Country'],
+    }),
+    deleteCountry: builder.mutation<void, string>({
+      query: (code) => ({
+        url: `/countries/${code}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Country'],
+    }),
+    setDefaultCountry: builder.mutation<Country, string>({
+      query: (code) => ({
+        url: `/countries/${code}/default`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['Country'],
     }),
     getCountryConfig: builder.query<CountryConfig, string>({
       query: (code) => `/countries/${code}/config`,

@@ -27,7 +27,7 @@ export function Header() {
   }
 
   return (
-    <header className="relative bg-dark-100/95 backdrop-blur-md border-b border-primary-500/20 shadow-lg">
+    <header className="sticky top-0 z-[100] bg-dark-100/95 backdrop-blur-md border-b border-primary-500/20 shadow-lg">
       {/* Animated border */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-500 to-transparent animate-pulse"></div>
       

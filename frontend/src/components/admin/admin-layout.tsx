@@ -100,6 +100,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   Inventory
                 </Link>
                 <Link
+                  href="/admin/countries"
+                  className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
+                >
+                  Regions
+                </Link>
+                <Link
                   href="/admin/validations"
                   className="nav-link text-dark-700 hover:text-primary-400 whitespace-nowrap py-2 px-3 font-tech font-medium text-sm"
                 >

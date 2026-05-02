@@ -1,9 +1,13 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body, Patch, Delete, UseGuards } from '@nestjs/common';
 import { CountriesService } from './countries.service';
 import { Country } from '../entities/country.entity';
-import { CountryConfigDto } from './dto/country.dto';
+import { CountryConfigDto, CountryDto } from './dto/country.dto';
 import { ProductPrice } from '../entities/product-price.entity';
 import { Public } from '../auth/decorators/public.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../entities/user.entity';
 
 @Controller('countries')
 export class CountriesController {
@@ -16,9 +20,43 @@ export class CountriesController {
   }
 
   @Public()
+  @Get('default')
+  async findDefault(): Promise<Country | null> {
+    return this.countriesService.findDefault();
+  }
+
+  @Public()
   @Get(':code')
   async findByCode(@Param('code') code: string): Promise<Country> {
     return this.countriesService.findByCode(code);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async create(@Body() countryDto: CountryDto): Promise<Country> {
+    return this.countriesService.create(countryDto);
+  }
+
+  @Patch(':code')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async update(@Param('code') code: string, @Body() countryDto: CountryDto): Promise<Country> {
+    return this.countriesService.update(code, countryDto);
+  }
+
+  @Delete(':code')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async delete(@Param('code') code: string): Promise<void> {
+    return this.countriesService.delete(code);
+  }
+
+  @Patch(':code/default')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async setDefault(@Param('code') code: string): Promise<Country> {
+    return this.countriesService.setDefault(code);
   }
 
   @Public()

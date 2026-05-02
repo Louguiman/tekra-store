@@ -7,6 +7,7 @@ export interface Country {
   name: string
   currency: string
   flag: string
+  isDefault?: boolean
 }
 
 interface CountryState {
@@ -64,6 +65,7 @@ const countrySlice = createSlice({
         name: country.name,
         currency: country.currency,
         flag: getFlagForCountry(country.code),
+        isDefault: country.isDefault,
       }))
     },
     setCountryConfig: (state, action: PayloadAction<CountryConfig>) => {

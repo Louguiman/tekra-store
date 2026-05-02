@@ -1,4 +1,4 @@
-import { IsString, IsOptional, Length } from 'class-validator';
+import { IsString, IsOptional, Length, IsBoolean } from 'class-validator';
 
 export class CountryDto {
   @IsString()
@@ -17,6 +17,10 @@ export class CountryDto {
   @IsString()
   @IsOptional()
   flag?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isDefault?: boolean;
 }
 
 export class CountryConfigDto {

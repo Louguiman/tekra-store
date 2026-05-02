@@ -23,6 +23,9 @@ export class Country {
   @Column({ length: 10, default: 'FCFA' })
   currency: string;
 
+  @Column({ default: false })
+  isDefault: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

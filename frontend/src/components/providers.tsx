@@ -4,12 +4,15 @@ import { Provider } from 'react-redux'
 import { Toaster } from 'react-hot-toast'
 import { store } from '@/store'
 import { LanguageProvider } from '@/contexts/LanguageContext'
+import { CountryInitializer } from './country-initializer'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <LanguageProvider>
-        {children}
+        <CountryInitializer>
+          {children}
+        </CountryInitializer>
         <Toaster
           position="top-right"
           toastOptions={{

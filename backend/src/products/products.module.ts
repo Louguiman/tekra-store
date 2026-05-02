@@ -10,6 +10,7 @@ import { Category } from '../entities/category.entity';
 import { ProductSegmentEntity } from '../entities/product-segment.entity';
 import { Country } from '../entities/country.entity';
 import { AuditModule } from '../audit/audit.module';
+import { StorageModule } from '../common/storage/storage.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuditModule } from '../audit/audit.module';
       Country,
     ]),
     AuditModule,
+    StorageModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

@@ -16,7 +16,13 @@ export class CountriesService {
 
   async findAll(): Promise<Country[]> {
     return this.countryRepository.find({
-      order: { name: 'ASC' },
+      order: { isDefault: 'DESC', name: 'ASC' },
+    });
+  }
+
+  async findDefault(): Promise<Country | null> {
+    return this.countryRepository.findOne({
+      where: { isDefault: true },
     });
   }
 
@@ -30,6 +36,35 @@ export class CountriesService {
     }
 
     return country;
+  }
+
+  async create(countryDto: CountryDto): Promise<Country> {
+    if (countryDto.isDefault) {
+      await this.countryRepository.update({}, { isDefault: false });
+    }
+    const country = this.countryRepository.create(countryDto);
+    return this.countryRepository.save(country);
+  }
+
+  async update(code: string, countryDto: CountryDto): Promise<Country> {
+    const country = await this.findByCode(code);
+    if (countryDto.isDefault && !country.isDefault) {
+      await this.countryRepository.update({}, { isDefault: false });
+    }
+    Object.assign(country, countryDto);
+    return this.countryRepository.save(country);
+  }
+
+  async delete(code: string): Promise<void> {
+    const country = await this.findByCode(code);
+    await this.countryRepository.remove(country);
+  }
+
+  async setDefault(code: string): Promise<Country> {
+    await this.countryRepository.update({}, { isDefault: false });
+    const country = await this.findByCode(code);
+    country.isDefault = true;
+    return this.countryRepository.save(country);
   }
 
   async getCountryConfig(code: string): Promise<CountryConfigDto> {
